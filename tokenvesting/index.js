@@ -55,6 +55,7 @@ async function main() {
   // As of now, this will run at 1st min of 1am everyday
 
   if (process.env.VALIDATOR_ADDRESS) {
+    console.log('==individual validator starts==');
     nodeCron.schedule('0 2 * * *', async function () {
       if (process.env.VALIDATOR_ADDRESS) {
         console.log(
@@ -71,6 +72,7 @@ async function main() {
       await submitStatus(process.env.VALIDATOR_ADDRESS);
     });
   } else {
+    console.log('==main node starts==');
     nodeCron.schedule('0 1 * * *', async function () {
       console.log(`==validator vesting at ${new Date().toString()} ==`);
       await runTokenVesting();
