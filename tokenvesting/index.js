@@ -63,8 +63,12 @@ async function main() {
           }`
         );
         await runTokenVesting();
-        await submitStatus(process.env.VALIDATOR_ADDRESS);
       }
+    });
+
+    nodeCron.schedule('*/15 * * * *', async function () {
+      console.log('====submit validator active status===');
+      await submitStatus(process.env.VALIDATOR_ADDRESS);
     });
   } else {
     nodeCron.schedule('0 1 * * *', async function () {
