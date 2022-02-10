@@ -119,7 +119,7 @@ exports.rootDistributerReleaseAll = async function () {
   const releaseToMemberAll = rootDistributer.methods.releaseToMemberAll();
   const txObj = await releaseToMemberAll.send({
     from: myAccount,
-    gasLimit: web3.utils.toHex(300000),
+    gasLimit: web3.utils.toHex(500000),
     gasPrice,
   });
   console.log('Success rootDistributerReleaseAll!', txObj.transactionHash);
