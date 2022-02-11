@@ -13,13 +13,13 @@ const contracts = {
   },
   43114: {
     // mainnet
-    arableVesting: '',
-    rootDistributor: '',
-    teamDistributor: '',
-    stakingRoot: '',
-    staking: '',
-    farming: '',
-    otc: '',
+    arableVesting: '0xad1cDD8Fd63d21B39967222c9169735A7f5656CB',
+    rootDistributor: '0x842C14962E09FeA54eC9E320a8beE90aD8B32316',
+    teamDistributor: '0x5808Df38C39fB0CBe7F65caF4330a887e0924429',
+    stakingRoot: '0xfBBd365BCb6eC0485036F3223717927d99EEDFAf',
+    staking: '0x4bc722Cd3F7b29ae3A5e0a17a61b72Ea5020502B',
+    farming: '0x598EBAC38cF211749b1277c9a34d217226A476Af',
+    otc: '0xf3DF637952F9428b2b6d1925124344C56321D88a',
   },
 };
 
