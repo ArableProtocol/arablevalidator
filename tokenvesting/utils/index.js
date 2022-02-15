@@ -261,7 +261,7 @@ exports.setOTCDeal = async function (
     new BigNumber(Math.pow(10, 18))
   );
   const usdtAmountBN = new BigNumber(usdtAmount).multipliedBy(
-    new BigNumber(Math.pow(10, 18))
+    new BigNumber(Math.pow(10, 6))
   );
 
   const setUserDeal = otcContract.methods.setUserDeal(
