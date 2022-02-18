@@ -12,6 +12,8 @@ const nodeCron = require('node-cron');
 const { waitSeconds } = require('../utils/wait');
 require('dotenv').config();
 
+const isPrimaryFullNode = process.env.IS_PRIMARY_FULL_NODE === '1';
+
 async function runTokenVesting() {
   console.log('================ starting token vesting flow ================');
 
@@ -23,7 +25,7 @@ async function runTokenVesting() {
     const isReleasable = await releaseVesting();
     console.log('isReleasable', isReleasable);
 
-    if (isReleasable) {
+    if (isReleasable || isPrimaryFullNode) {
       console.log('====handle release from all====');
       await waitSeconds(10);
       // - RootDistributer.releaseToMemberAll - daily - any user (after release)
@@ -74,11 +76,18 @@ async function main() {
       await submitStatus(process.env.VALIDATOR_ADDRESS);
     });
   } else {
-    console.log('==main node starts==');
-    nodeCron.schedule('0 1 * * *', async function () {
-      console.log(`==validator vesting at ${new Date().toString()} ==`);
-      await runTokenVesting();
-    });
+    console.log('==main node starts== isPrimaryFullNode:', isPrimaryFullNode);
+    if (isPrimaryFullNode) {
+      nodeCron.schedule('0 1 * * *', async function () {
+        console.log(`==validator vesting at ${new Date().toString()} ==`);
+        await runTokenVesting();
+      });
+    } else {
+      nodeCron.schedule('20 1 * * *', async function () {
+        console.log(`==validator vesting at ${new Date().toString()} ==`);
+        await runTokenVesting();
+      });
+    }
   }
 }
 
