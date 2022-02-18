@@ -54,7 +54,9 @@ const getReleasableAmount = (
     .div(new BigNumber(Math.pow(10, 18)))
     .toFixed(0);
 
-  const isReleasable = releasableEther >= 400000;
+  console.log('==releasableAcre=', releasableEther);
+
+  const isReleasable = releasableEther >= 40000;
 
   return isReleasable;
 };
@@ -92,14 +94,19 @@ exports.releaseVesting = async function () {
     return false;
   }
 
-  const releaseVesting = arableVesting.methods.release();
-  const txObj = await releaseVesting.send({
-    from: myAccount,
-    gasLimit: web3.utils.toHex(300000),
-    gasPrice,
-  });
-  console.log('Success releaseVesting!', txObj.transactionHash);
-  return true;
+  try {
+    const releaseVesting = arableVesting.methods.release();
+    const txObj = await releaseVesting.send({
+      from: myAccount,
+      gasLimit: web3.utils.toHex(300000),
+      gasPrice,
+    });
+    console.log('Success releaseVesting!', txObj.transactionHash);
+    return true;
+  } catch (error) {
+    console.error('releaseVesting error:', error);
+    return false;
+  }
 };
 
 // - RootDistributer.releaseToMemberAll - daily - any user (after release)

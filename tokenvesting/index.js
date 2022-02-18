@@ -21,6 +21,8 @@ async function runTokenVesting() {
     // TODO: If already claimed for the epoch, not claim again to reduce gas price
     // - ArableVesting.release - daily - any user
     const isReleasable = await releaseVesting();
+    console.log('isReleasable', isReleasable);
+
     if (isReleasable) {
       console.log('====handle release from all====');
       await waitSeconds(10);
