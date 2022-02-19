@@ -1,16 +1,9 @@
 # Arable Validator Scripts
 
-## Instructions for Beta Testnet Competition
-
-### Prerequisites
-To participate as a validator, you need to apply via the [Validator submission form](https://docs.google.com/forms/d/e/1FAIpQLSdwVNPok1yF9HDiJRg3ATbko-5i5UcQdf3w4X5yFDpuJlAP3A/viewform) and join the [beta testnet competition](https://docs.google.com/forms/d/1pRUTFO_4PqX7HB2PsYoFSNaZj-h3rUBOydy_2Xj3aWY/viewform?edit_requested=true).
-
-Once you are approved, create a validator via [Arable protocol app](https://app.arablefi.com/admin/validator).
-
-### Validator setup
+## Validator setup
 To get the validator script up and running, follow [these instructions](https://github.com/ArableProtocol/arablevalidator/blob/main/validator.md). Running the validator script is required to collect any rewards.
 
-## Install dependencies
+## Development setup
 
 Install node
 
