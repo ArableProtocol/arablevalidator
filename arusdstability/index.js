@@ -1,9 +1,14 @@
+const nodeCron = require('node-cron');
+require('dotenv').config();
 const { Contract, providers, Wallet, utils, BigNumber } = require('ethers');
 const { UNISWAP_PAIR_ABI, FACTORY_UNI } = require('./ABI');
+const { waitSeconds } = require('../utils/wait');
 
-async function main() {
+async function runPriceStabilizer() {
   console.log('----- arUSD stability maintainer, in progress code -----');
-  console.log('arUSD stability maintainer, starting!');
+  console.log(
+    '================ starting arUSD stability maintainer ================'
+  );
   const provider = new providers.JsonRpcProvider('');
 
   const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
@@ -54,7 +59,15 @@ async function main() {
   } else {
     console.log('no action required for price stability');
   }
-  console.log('arUSD stability maintainer, starting!');
+  console.log(
+    '================ finishing arUSD stability maintainer ================'
+  );
+}
+
+async function main() {
+  await nodeCron.schedule(' 1 1 * * *', async function () {
+    await runPriceStabilizer();
+  });
 }
 
 main();
