@@ -12,3 +12,9 @@ exports.liquidate = async (unhealthyAccount, liquidationAmount) => {
   // TODO: implement the mechanism to convert liquidated funds into arUSD or into USDT - the point when to do it - do it instantly?
   console.log('liquidation finished');
 };
+
+exports.flagAccount = async (account) => {
+  console.log('flagging operation started');
+  // TODO: flag account for liquidation
+  console.log('flagging operation finished');
+};

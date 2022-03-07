@@ -5,7 +5,10 @@ exports.fetchUnhealthyAccounts = async function () {
   // TODO: set theGraphURL
   const theGraphURL = 'https://api.thegraph.com/subgraphs/name/--';
 
-  var totalUnhealtyAccounts = [];
+  var totalFlaggableAccounts = [];
+  var totalLiquidatableAccounts = [];
+
+  // TODO: get both accounts and global queries as well from the query
   console.log(`${Date().toLocaleString()} fetching unhealthy accounts}`);
   while (round < maxRound) {
     fetch(theGraphURL, {
@@ -25,24 +28,35 @@ exports.fetchUnhealthyAccounts = async function () {
       .then((res) => res.json())
       .then((res) => {
         const totalAccounts = res.data.users.length;
-        const unhealthyAccounts = collectUnhealthyAccounts(res.data);
+        const { flaggableAccounts, liquidatableAccounts } =
+          collectUnhealthyAccounts(res.data);
         console.log(
           `Records:${totalAccounts} Unhealthy:${unhealthyAccounts.length}`
         );
-        totalUnhealtyAccounts = totalUnhealtyAccounts.concat(unhealthyAccounts);
+        totalFlaggableAccounts =
+          totalFlaggableAccounts.concat(flaggableAccounts);
+        totalLiquidatableAccounts =
+          totalLiquidatableAccounts.concat(liquidatableAccounts);
       });
     round++;
   }
-  return totalUnhealtyAccounts;
+  return {
+    flaggableAccounts: totalFlaggableAccounts,
+    liquidatableAccounts: totalLiquidatableAccounts,
+  };
 };
 
 function collectUnhealthyAccounts(payload) {
-  var accounts = [];
+  var flaggableAccounts = [];
+  var liquidatableAccounts = [];
   payload.users.forEach((user, i) => {
     // TODO: check if flagged and passed enough time, push to unhealthy list
     // TODO: check if reached immediate liquidation level, push to unhealthy list
     // TODO: determine which fields to add here - liquidation amount, account address accounts.push({});
   });
 
-  return accounts;
+  return {
+    flaggableAccounts,
+    liquidatableAccounts,
+  };
 }

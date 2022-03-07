@@ -1,20 +1,27 @@
 const { fetchUnhealthyAccounts } = require('./fetchUnhealthyAccounts');
-const { liquidate } = require('./liquidate');
+const { liquidate, flagAccount } = require('./liquidate');
 
 async function liquidateUnhealthyAccounts() {
   console.log('fetching unhealth accounts');
-  const accounts = fetchUnhealthyAccounts();
+  const { flaggableAccounts, liquidatableAccounts } = fetchUnhealthyAccounts();
   console.log('liquidating unhealthy accounts');
-  for (let i = 0; i < accounts.length; i++) {
-    console.log(`liquidating ${i + 1}th/${accounts.length} account`);
-    liquidate(accounts[i]);
-    console.log(`liquidated ${i + 1}th/${accounts.length} account`);
+  for (let i = 0; i < liquidatableAccounts.length; i++) {
+    console.log(
+      `liquidating ${i + 1}th/${liquidatableAccounts.length} account`
+    );
+    liquidate(liquidatableAccounts[i]);
+    console.log(`liquidated ${i + 1}th/${liquidatableAccounts.length} account`);
+  }
+  for (let i = 0; i < flaggableAccounts.length; i++) {
+    console.log(`flagging ${i + 1}th/${flaggableAccounts.length} account`);
+    liquidate(flaggableAccounts[i]);
+    console.log(`flagged ${i + 1}th/${flaggableAccounts.length} account`);
   }
   console.log('finalized liquidating accounts and sleeping');
 }
 
 async function main() {
-  console.log('Undercollateralized positions liquidator, implement it!');
+  console.log('Unhealthy accounts liquidator starting!');
   while (1 == 1) {
     liquidateUnhealthyAccounts();
     await sleep(60000);
