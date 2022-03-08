@@ -5,13 +5,15 @@ exports.fetchUnhealthyAccounts = async function () {
   var maxRound = 5; // look for maximum of 5000 accounts for now
 
   try {
+    // https://thegraph.com/hosted-service/subgraph/arableprotocol/arable-liquidation-fuji
     const theGraphURL =
-      'https://thegraph.com/hosted-service/subgraph/arableprotocol/arable-liquidation-fuji';
+      'https://api.thegraph.com/subgraphs/name/arableprotocol/arable-liquidation-fuji';
 
-    const globalInfos = await axios.post(
-      theGraphURL,
-      {
-        query: `{
+    const globalInfos = (
+      await axios.post(
+        theGraphURL,
+        {
+          query: `{
           globalInfos(first: 1) {
             id
             liquidateRate
@@ -32,13 +34,14 @@ exports.fetchUnhealthyAccounts = async function () {
             rate
           }
         }`,
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
         },
-      }
-    );
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+    ).data;
 
     console.log('globalInfos', globalInfos);
 
@@ -48,10 +51,11 @@ exports.fetchUnhealthyAccounts = async function () {
     // TODO: get both accounts and global queries as well from the query
     console.log(`${Date().toLocaleString()} fetching unhealthy accounts}`);
     while (round < maxRound) {
-      const users = await axios.post(
-        theGraphURL,
-        {
-          query: `{
+      const users = (
+        await axios.post(
+          theGraphURL,
+          {
+            query: `{
             users(first: 1000, where:{debtFactor_gt:1}) {
               id
               liquidationDeadline
@@ -66,15 +70,16 @@ exports.fetchUnhealthyAccounts = async function () {
               }
             }
           }`,
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
           },
-        }
-      );
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        )
+      ).data;
 
-      console.log('users', users);
+      console.log('users', users.data);
 
       const totalAccounts = users.length;
       const { flaggableAccounts, liquidatableAccounts } =
