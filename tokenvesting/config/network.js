@@ -17,7 +17,7 @@ exports.setup = function () {
 exports.getBackendApiUrl = function () {
   const chainId = Number(process.env.CHAIN_ID || '43114');
   if (chainId == 43114) {
-    return 'https://api.arablefi.com/api';
+    return 'https://api.arable.finance/api';
   }
-  return 'https://api.fuji.arablefi.com/api';
+  return 'https://api.fuji.arable.finance/api';
 };
