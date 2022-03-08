@@ -3,9 +3,9 @@ const {
   setup,
   getBackendApiUrl,
   getEthersProvider,
-} = require('../config/network');
+} = require('./config/network');
 
-const { collateral, liquidation, arUSD } = require('../config/address.js');
+const { collateral, liquidation, arUSD } = require('./config/address.js');
 
 const collateral_abi = require('./abis/arable_collateral_abi');
 const liquidation_abi = require('./abis/arable_liquidation_abi');
@@ -39,7 +39,7 @@ exports.liquidate = async (unhealthyAccount, liquidationAmount) => {
     ethers.constants.MaxUint256
   );
 
-  let txObj = await approveTx.send({
+  const approveTxObj = await approveTx.send({
     from: myAccount,
     gasLimit: web3.utils.toHex(300000),
     gasPrice,
@@ -52,7 +52,7 @@ exports.liquidate = async (unhealthyAccount, liquidationAmount) => {
   // be cleared up for protocol's health - contract can handle this case?
   // call liquidationContract.liquidate()
   const liquidationTx = liquidationContract.methods.liquidate(unhealthyAccount);
-  let txObj = await liquidationTx.send({
+  const liquidationTxObj = await liquidationTx.send({
     from: myAccount,
     gasLimit: web3.utils.toHex(300000),
     gasPrice,
@@ -63,7 +63,7 @@ exports.liquidate = async (unhealthyAccount, liquidationAmount) => {
   console.log('liquidation finished');
 };
 
-exports.flagAccount = async (account) => {
+exports.flagAccount = async (unhealthyAccount) => {
   console.log(`flagging operation started for ${account}`);
   // initiate the account
   const account = web3.eth.accounts.privateKeyToAccount(
@@ -80,7 +80,8 @@ exports.flagAccount = async (account) => {
   );
 
   // flag account for liquidation
-  const flagTx = liquidationContract.methods.flagForLiquidation(account);
+  const flagTx =
+    liquidationContract.methods.flagForLiquidation(unhealthyAccount);
   const txObj = await flagTx.send({
     from: myAccount,
     gasLimit: web3.utils.toHex(300000),

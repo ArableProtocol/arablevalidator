@@ -1,49 +1,87 @@
+var axios = require('axios');
+
 exports.fetchUnhealthyAccounts = async function () {
   var round = 0;
   var maxRound = 5; // look for maximum of 5000 accounts for now
 
-  // TODO: set theGraphURL
-  const theGraphURL = 'https://api.thegraph.com/subgraphs/name/--';
+  try {
+    const theGraphURL =
+      'https://thegraph.com/hosted-service/subgraph/arableprotocol/arable-liquidation-fuji';
 
-  var totalFlaggableAccounts = [];
-  var totalLiquidatableAccounts = [];
+    const globalInfos = await axios.post(
+      theGraphURL,
+      {
+        query: `{
+          globalInfos(first: 1) {
+            id
+            liquidateRate
+            liquidationDelay
+            liquidationPenalty
+            totalDebtFactor
+            totalDebt
+          }
+        }`,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
-  // TODO: get both accounts and global queries as well from the query
-  console.log(`${Date().toLocaleString()} fetching unhealthy accounts}`);
-  while (round < maxRound) {
-    fetch(theGraphURL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: `
-      query GET_ACCOUNTS {
-        users(first:1000, skip:${
-          1000 * count
-        }, orderBy: id, orderDirection: desc, where: {debtFactor_gt: 0}) {
-          id
+    console.log('globalInfos', globalInfos);
+
+    var totalFlaggableAccounts = [];
+    var totalLiquidatableAccounts = [];
+
+    // TODO: get both accounts and global queries as well from the query
+    console.log(`${Date().toLocaleString()} fetching unhealthy accounts}`);
+    while (round < maxRound) {
+      const users = await axios.post(
+        theGraphURL,
+        {
+          query: `{
+            users(first: 1000, where:{debtFactor_gt:1}) {
+              id
+              liquidationDeadline
+              address
+              collateralAssets {
+                id
+              }
+            }
+          }`,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
         }
-      }`,
-      }),
-    })
-      .then((res) => res.json())
-      .then((res) => {
-        const totalAccounts = res.data.users.length;
-        const { flaggableAccounts, liquidatableAccounts } =
-          collectUnhealthyAccounts(res.data);
-        console.log(
-          `Records:${totalAccounts} Unhealthy:${unhealthyAccounts.length}`
-        );
-        totalFlaggableAccounts =
-          totalFlaggableAccounts.concat(flaggableAccounts);
-        totalLiquidatableAccounts =
-          totalLiquidatableAccounts.concat(liquidatableAccounts);
-      });
-    round++;
+      );
+
+      console.log('users', users);
+
+      const totalAccounts = users.length;
+      const { flaggableAccounts, liquidatableAccounts } =
+        collectUnhealthyAccounts(users);
+      console.log(
+        `Records:${totalAccounts} Unhealthy:${unhealthyAccounts.length}`
+      );
+      totalFlaggableAccounts = totalFlaggableAccounts.concat(flaggableAccounts);
+      totalLiquidatableAccounts =
+        totalLiquidatableAccounts.concat(liquidatableAccounts);
+      round++;
+    }
+    return {
+      flaggableAccounts: totalFlaggableAccounts,
+      liquidatableAccounts: totalLiquidatableAccounts,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      flaggableAccounts: [],
+      liquidatableAccounts: [],
+    };
   }
-  return {
-    flaggableAccounts: totalFlaggableAccounts,
-    liquidatableAccounts: totalLiquidatableAccounts,
-  };
 };
 
 function collectUnhealthyAccounts(payload) {
