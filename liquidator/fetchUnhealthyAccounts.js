@@ -20,6 +20,17 @@ exports.fetchUnhealthyAccounts = async function () {
             totalDebtFactor
             totalDebt
           }
+          prices(first: 1000) {
+            id
+            price
+            address
+          }
+          rewardRates(first: 1000) {
+            id
+            farmId
+            rewardToken
+            rate
+          }
         }`,
       },
       {
@@ -45,8 +56,13 @@ exports.fetchUnhealthyAccounts = async function () {
               id
               liquidationDeadline
               address
+    					debtFactor
               collateralAssets {
                 id
+                amount
+                collateralAsset {
+                  address
+                }
               }
             }
           }`,
