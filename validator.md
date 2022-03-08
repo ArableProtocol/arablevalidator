@@ -50,6 +50,10 @@ The chain ID the validator will run on. The chain ID for Avalanche Mainnet C-Cha
 
 Provide the contract address for your validator. You can find it by going to https://app.arable.finance/#/admin/validator and checking the 'Member' address. If you have not registered your validator yet, click on `+Create Validator` to see your 'Member' contract address.
 
+#### IS_PRIMARY_FULL_NODE
+
+This is for future use and you can leave it empty for now.
+
 ```
 nano .env
 ```
