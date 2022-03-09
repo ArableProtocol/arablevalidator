@@ -1,9 +1,10 @@
 var axios = require('axios');
+var { BigNumber } = require('ethers');
 var { parseEther } = require('ethers/lib/utils');
 
 exports.fetchUnhealthyAccounts = async function () {
   var round = 0;
-  var maxRound = 5; // look for maximum of 5000 accounts for now
+  var maxRound = 1; // look for maximum of 5000 accounts for now
 
   try {
     // https://thegraph.com/hosted-service/subgraph/arableprotocol/arable-liquidation-fuji
@@ -17,7 +18,8 @@ exports.fetchUnhealthyAccounts = async function () {
           query: `{
           globalInfos(first: 1) {
             id
-            liquidateRate
+            liquidationRate
+            immediateLiquidationRate
             liquidationDelay
             liquidationPenalty
             totalDebtFactor
@@ -108,30 +110,36 @@ function collectUnhealthyAccounts(users, globalInfos) {
   console.log('users', users);
 
   const {
-    totalDebtFactor,
-    totalDebt,
-    liquidationRate,
-    immediateLiquidationRate,
+    totalDebtFactor: totalDebtFactor_,
+    totalDebt: totalDebt_,
+    liquidationRate: liquidationRate_,
+    immediateLiquidationRate: immediateLiquidationRate_,
   } = globalInfos.globalInfos[0];
+
+  let totalDebtFactor = BigNumber.from(totalDebtFactor_);
+  let totalDebt = BigNumber.from(totalDebt_);
+  let liquidationRate = BigNumber.from(liquidationRate_ || 0);
+  let immediateLiquidationRate = BigNumber.from(immediateLiquidationRate_ || 0);
 
   const { collateralAssets, prices } = globalInfos;
 
   const allowedRateMapping = {};
   for (let i = 0; i < collateralAssets.length; i++) {
-    allowedRateMapping[collateralAssets[i].address] =
-      collateralAssets[i].allowedRate;
+    allowedRateMapping[collateralAssets[i].address] = BigNumber.from(
+      collateralAssets[i].allowedRate
+    );
   }
 
   const priceMapping = {};
   for (let i = 0; i < prices.length; i++) {
-    priceMapping[prices[i].address] = prices[i].price;
+    priceMapping[prices[i].address] = BigNumber.from(prices[i].price);
   }
 
   var flaggableAccounts = [];
   var liquidatableAccounts = [];
   users.forEach((user) => {
-    let currDebt = (totalDebt * user.debtFactor) / totalDebtFactor;
-    let maxDebt = 0;
+    let currDebt = totalDebt.mul(user.debtFactor).div(totalDebtFactor);
+    let maxDebt = BigNumber.from(0);
     let userCollaterals = user.collateralAssets;
     for (let i = 0; i < userCollaterals.length; i++) {
       const userCollateral = userCollaterals[i];
@@ -139,7 +147,7 @@ function collectUnhealthyAccounts(users, globalInfos) {
         const collateralAddress = userCollateral.collateralAsset.address;
         let allowedRate = allowedRateMapping[collateralAddress];
         if (allowedRate.gt(0)) {
-          let collateralValue = userCollateral.amount
+          let collateralValue = BigNumber.from(userCollateral.amount)
             .mul(priceMapping[collateralAddress])
             .div(parseEther('1'));
           maxDebt = maxDebt.add(
@@ -149,7 +157,7 @@ function collectUnhealthyAccounts(users, globalInfos) {
       }
     }
 
-    let userLiquidationRate = BigNumber.Zero();
+    let userLiquidationRate = BigNumber.from(0);
     if (maxDebt.gt(0)) {
       userLiquidationRate = currDebt.mul(parseEther('1')).div(maxDebt);
     }
@@ -163,8 +171,8 @@ function collectUnhealthyAccounts(users, globalInfos) {
     }
 
     // TODO: should update this to use on-chain information
-    const currTimestamp = Math.floor(Date.now().getTime() / 1000);
-    if (user.liquidationDeadline.isZero()) {
+    const currTimestamp = Math.floor(Date.now() / 1000);
+    if (user.liquidationDeadline == 0) {
       flaggableAccounts.push(user);
     } else if (user.liquidationDeadline >= currTimestamp) {
       liquidatableAccounts.push(user);

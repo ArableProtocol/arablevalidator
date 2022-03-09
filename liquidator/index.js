@@ -1,24 +1,38 @@
 const { fetchUnhealthyAccounts } = require('./fetchUnhealthyAccounts');
-const { liquidate, flagAccount } = require('./liquidate');
+const {
+  liquidate,
+  flagAccount,
+  approveArUSDForLiquidation,
+} = require('./liquidate');
 const { waitSeconds } = require('../utils/wait');
 
 async function liquidateUnhealthyAccounts() {
-  console.log('fetching unhealth accounts');
+  console.log('fetching unhealthy accounts');
 
+  // approve arUSD for liquidation
+  await approveArUSDForLiquidation();
+
+  // fetch flaggable accounts
   const { flaggableAccounts, liquidatableAccounts } =
     await fetchUnhealthyAccounts();
+
+  // start liquidating
   console.log('liquidating unhealthy accounts');
   for (let i = 0; i < liquidatableAccounts.length; i++) {
     console.log(
       `liquidating ${i + 1}th/${liquidatableAccounts.length} account`
     );
-    liquidate(liquidatableAccounts[i]);
+    await liquidate(liquidatableAccounts[i]);
     console.log(`liquidated ${i + 1}th/${liquidatableAccounts.length} account`);
+    await waitSeconds(10);
   }
+
+  // start flagging
   for (let i = 0; i < flaggableAccounts.length; i++) {
     console.log(`flagging ${i + 1}th/${flaggableAccounts.length} account`);
-    flagAccount(flaggableAccounts[i]);
+    await flagAccount(flaggableAccounts[i]);
     console.log(`flagged ${i + 1}th/${flaggableAccounts.length} account`);
+    await waitSeconds(10);
   }
   console.log('finalized liquidating accounts and sleeping');
 }
