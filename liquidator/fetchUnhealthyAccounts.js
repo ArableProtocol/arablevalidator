@@ -1,4 +1,5 @@
 var axios = require('axios');
+var { parseEther } = require('ethers/lib/utils');
 
 exports.fetchUnhealthyAccounts = async function () {
   var round = 0;
@@ -33,6 +34,11 @@ exports.fetchUnhealthyAccounts = async function () {
             rewardToken
             rate
           }
+          collateralAssets(first: 1000) {
+            id
+            address
+            allowedRate
+          }
         }`,
         },
         {
@@ -41,9 +47,7 @@ exports.fetchUnhealthyAccounts = async function () {
           },
         }
       )
-    ).data;
-
-    console.log('globalInfos', globalInfos);
+    ).data.data;
 
     var totalFlaggableAccounts = [];
     var totalLiquidatableAccounts = [];
@@ -77,16 +81,10 @@ exports.fetchUnhealthyAccounts = async function () {
             },
           }
         )
-      ).data;
+      ).data.data.users;
 
-      console.log('users', users.data);
-
-      const totalAccounts = users.length;
       const { flaggableAccounts, liquidatableAccounts } =
-        collectUnhealthyAccounts(users);
-      console.log(
-        `Records:${totalAccounts} Unhealthy:${unhealthyAccounts.length}`
-      );
+        collectUnhealthyAccounts(users, globalInfos);
       totalFlaggableAccounts = totalFlaggableAccounts.concat(flaggableAccounts);
       totalLiquidatableAccounts =
         totalLiquidatableAccounts.concat(liquidatableAccounts);
@@ -105,14 +103,76 @@ exports.fetchUnhealthyAccounts = async function () {
   }
 };
 
-function collectUnhealthyAccounts(payload) {
+function collectUnhealthyAccounts(users, globalInfos) {
+  console.log('globalInfos', globalInfos);
+  console.log('users', users);
+
+  const {
+    totalDebtFactor,
+    totalDebt,
+    liquidationRate,
+    immediateLiquidationRate,
+  } = globalInfos.globalInfos[0];
+
+  const { collateralAssets, prices } = globalInfos;
+
+  const allowedRateMapping = {};
+  for (let i = 0; i < collateralAssets.length; i++) {
+    allowedRateMapping[collateralAssets[i].address] =
+      collateralAssets[i].allowedRate;
+  }
+
+  const priceMapping = {};
+  for (let i = 0; i < prices.length; i++) {
+    priceMapping[prices[i].address] = prices[i].price;
+  }
+
   var flaggableAccounts = [];
   var liquidatableAccounts = [];
-  payload.users.forEach((user, i) => {
-    // TODO: check if flagged and passed enough time, push to unhealthy list
-    // TODO: check if reached immediate liquidation level, push to unhealthy list
-    // TODO: determine which fields to add here - liquidation amount, account address accounts.push({});
+  users.forEach((user) => {
+    let currDebt = (totalDebt * user.debtFactor) / totalDebtFactor;
+    let maxDebt = 0;
+    let userCollaterals = user.collateralAssets;
+    for (let i = 0; i < userCollaterals.length; i++) {
+      const userCollateral = userCollaterals[i];
+      if (userCollateral.amount > 0) {
+        const collateralAddress = userCollateral.collateralAsset.address;
+        let allowedRate = allowedRateMapping[collateralAddress];
+        if (allowedRate.gt(0)) {
+          let collateralValue = userCollateral.amount
+            .mul(priceMapping[collateralAddress])
+            .div(parseEther('1'));
+          maxDebt = maxDebt.add(
+            collateralValue.mul(parseEther('1')).div(allowedRate)
+          );
+        }
+      }
+    }
+
+    let userLiquidationRate = BigNumber.Zero();
+    if (maxDebt.gt(0)) {
+      userLiquidationRate = currDebt.mul(parseEther('1')).div(maxDebt);
+    }
+
+    if (userLiquidationRate.lt(liquidationRate)) {
+      return;
+    }
+
+    if (userLiquidationRate.gte(immediateLiquidationRate)) {
+      liquidatableAccounts.push(user);
+    }
+
+    // TODO: should update this to use on-chain information
+    const currTimestamp = Math.floor(Date.now().getTime() / 1000);
+    if (user.liquidationDeadline.isZero()) {
+      flaggableAccounts.push(user);
+    } else if (user.liquidationDeadline >= currTimestamp) {
+      liquidatableAccounts.push(user);
+    }
   });
+
+  console.log('flaggableAccounts', flaggableAccounts);
+  console.log('liquidatableAccounts', liquidatableAccounts);
 
   return {
     flaggableAccounts,
