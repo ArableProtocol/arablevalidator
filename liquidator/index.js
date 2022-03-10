@@ -9,12 +9,12 @@ const { waitSeconds } = require('../utils/wait');
 async function liquidateUnhealthyAccounts() {
   console.log('fetching unhealthy accounts');
 
-  // approve arUSD for liquidation
-  await approveArUSDForLiquidation();
-
   // fetch flaggable accounts
   const { flaggableAccounts, liquidatableAccounts } =
     await fetchUnhealthyAccounts();
+
+  // approve arUSD for liquidation
+  await approveArUSDForLiquidation();
 
   // start liquidating
   console.log('liquidating unhealthy accounts');
@@ -40,7 +40,7 @@ async function liquidateUnhealthyAccounts() {
 async function main() {
   console.log('Unhealthy accounts liquidator starting!');
   while (1 == 1) {
-    liquidateUnhealthyAccounts();
+    await liquidateUnhealthyAccounts();
     await waitSeconds(60);
   }
 }

@@ -36,7 +36,6 @@ exports.approveArUSDForLiquidation = async () => {
     ethers.constants.MaxUint256.toString()
   );
 
-  console.log('step2', gasPrice);
   const approveTxObj = await approveTx.send({
     from: myAccount,
     gasLimit: 300000,

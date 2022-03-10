@@ -55,7 +55,7 @@ exports.fetchUnhealthyAccounts = async function () {
     var totalLiquidatableAccounts = [];
 
     // TODO: get both accounts and global queries as well from the query
-    console.log(`${Date().toLocaleString()} fetching unhealthy accounts}`);
+    console.log(`fetching unhealthy accounts`);
     while (round < maxRound) {
       const users = (
         await axios.post(
@@ -106,8 +106,8 @@ exports.fetchUnhealthyAccounts = async function () {
 };
 
 function collectUnhealthyAccounts(users, globalInfos) {
-  console.log('globalInfos', globalInfos);
-  console.log('users', users);
+  // console.log('globalInfos', globalInfos);
+  // console.log('users', users);
 
   const {
     totalDebtFactor: totalDebtFactor_,
@@ -160,7 +160,22 @@ function collectUnhealthyAccounts(users, globalInfos) {
     let userLiquidationRate = BigNumber.from(0);
     if (maxDebt.gt(0)) {
       userLiquidationRate = currDebt.mul(parseEther('1')).div(maxDebt);
+    } else if (currDebt.gt(0)) {
+      userLiquidationRate = parseEther('100'); // 10000%
     }
+
+    console.log(
+      'userLiquidationRate',
+      userLiquidationRate.toString(),
+      user.address,
+      currDebt.toString(),
+      maxDebt.toString()
+    );
+    console.log('globalliquidationRate', liquidationRate.toString());
+    console.log(
+      'globalImmediateLiquidationRate',
+      immediateLiquidationRate.toString()
+    );
 
     if (userLiquidationRate.lt(liquidationRate)) {
       return;
@@ -168,14 +183,14 @@ function collectUnhealthyAccounts(users, globalInfos) {
 
     if (userLiquidationRate.gte(immediateLiquidationRate)) {
       liquidatableAccounts.push(user);
-    }
-
-    // TODO: should update this to use on-chain information
-    const currTimestamp = Math.floor(Date.now() / 1000);
-    if (user.liquidationDeadline == 0) {
-      flaggableAccounts.push(user);
-    } else if (user.liquidationDeadline >= currTimestamp) {
-      liquidatableAccounts.push(user);
+    } else {
+      // TODO: should update this to use on-chain information
+      const currTimestamp = Math.floor(Date.now() / 1000);
+      if (user.liquidationDeadline == 0) {
+        flaggableAccounts.push(user);
+      } else if (user.liquidationDeadline >= currTimestamp) {
+        liquidatableAccounts.push(user);
+      }
     }
   });
 

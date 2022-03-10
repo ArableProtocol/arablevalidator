@@ -7,7 +7,7 @@ function getNetwork() {
 }
 
 exports.setup = function () {
-  const chainId = Number(process.env.CHAIN_ID || '43114');
+  const chainId = Number(process.env.CHAIN_ID || '43113');
   if (chainId == 43114) {
     return new Web3(avax_url);
   }
@@ -15,7 +15,7 @@ exports.setup = function () {
 };
 
 exports.getBackendApiUrl = function () {
-  const chainId = Number(process.env.CHAIN_ID || '43114');
+  const chainId = Number(process.env.CHAIN_ID || '43113');
   if (chainId == 43114) {
     return 'https://api.arablefi.com/api';
   }
