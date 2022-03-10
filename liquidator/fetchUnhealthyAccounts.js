@@ -190,9 +190,11 @@ function collectUnhealthyAccounts(users, globalInfos) {
     } else {
       // TODO: should update this to use on-chain information
       const currTimestamp = Math.floor(Date.now() / 1000);
+      console.log('user.liquidationDeadline', user.liquidationDeadline);
+      console.log('currTimestamp', currTimestamp);
       if (user.liquidationDeadline == 0) {
         flaggableAccounts.push(user);
-      } else if (user.liquidationDeadline >= currTimestamp) {
+      } else if (user.liquidationDeadline <= currTimestamp) {
         liquidatableAccounts.push(user);
       }
     }

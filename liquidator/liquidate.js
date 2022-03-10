@@ -1,9 +1,10 @@
-const { ethers } = require('ethers');
+const { ethers, BigNumber } = require('ethers');
 const {
   setup,
   getBackendApiUrl,
   getEthersProvider,
 } = require('./config/network');
+var { parseEther } = require('ethers/lib/utils');
 
 const { collateral, liquidation, arUSD } = require('./config/address.js');
 
@@ -27,6 +28,17 @@ exports.approveArUSDForLiquidation = async () => {
   console.log('initiate the contracts with abi and contract address');
   // initiate the contracts with abi and contract address
   const arUSDContract = new web3.eth.Contract(synth_abi, arUSD);
+
+  const allowanceCall = await arUSDContract.methods.allowance(
+    myAccount,
+    liquidation
+  );
+  let allowance = await allowanceCall.call();
+
+  if (BigNumber.from(allowance).gte(parseEther('10000000'))) {
+    console.log('already allowed and skipping');
+    return;
+  }
 
   // TODO: approve only once if it's not approved already
   console.log('approving arUSD to be used for liquidation');
@@ -91,7 +103,7 @@ exports.liquidate = async (unhealthyAccount, liquidationAmount) => {
 };
 
 exports.flagAccount = async (unhealthyAccount) => {
-  console.log(`flagging operation started for ${unhealthyAccount}`);
+  console.log(`flagging operation started for ${unhealthyAccount.address}`);
   // initiate the account
   const account = web3.eth.accounts.privateKeyToAccount(
     process.env.PRIVATE_KEY
