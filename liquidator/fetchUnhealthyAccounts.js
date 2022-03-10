@@ -1,6 +1,7 @@
 var axios = require('axios');
 var { BigNumber } = require('ethers');
 var { parseEther } = require('ethers/lib/utils');
+var { formatBigNumber } = require('../utils/format');
 
 exports.fetchUnhealthyAccounts = async function () {
   var round = 0;
@@ -166,15 +167,18 @@ function collectUnhealthyAccounts(users, globalInfos) {
 
     console.log(
       'userLiquidationRate',
-      userLiquidationRate.toString(),
+      formatBigNumber(userLiquidationRate, 18, 2),
       user.address,
-      currDebt.toString(),
-      maxDebt.toString()
+      formatBigNumber(currDebt, 18, 2),
+      formatBigNumber(maxDebt, 18, 2)
     );
-    console.log('globalliquidationRate', liquidationRate.toString());
+    console.log(
+      'globalliquidationRate',
+      formatBigNumber(liquidationRate, 18, 2)
+    );
     console.log(
       'globalImmediateLiquidationRate',
-      immediateLiquidationRate.toString()
+      formatBigNumber(immediateLiquidationRate, 18, 2)
     );
 
     if (userLiquidationRate.lt(liquidationRate)) {

@@ -63,25 +63,31 @@ exports.liquidate = async (unhealthyAccount, liquidationAmount) => {
     liquidation
   );
 
-  console.log('call liquidationContract.liquidate()');
   // TODO: For now, liquidating full amount but it shouldn't be like that - should be able to liquidate partial amount
   // TODO: liquidation amount should be min(account_balance, userDebt)
   // TODO: considering the case user debt could change, contract should be able to accept zero value so that liquidation call can liquidate maximum amount - when partial is allowed
   // TODO: there could be also the case that currentDebt > collateral - in this case, even though the liquidator get lose, it should be able to
   // be cleared up for protocol's health - contract can handle this case?
   // call liquidationContract.liquidate()
-  const liquidationTx = liquidationContract.methods.liquidate(
-    unhealthyAccount.address
-  );
-  const liquidationTxObj = await liquidationTx.send({
-    from: myAccount,
-    gasLimit: 300000,
-    gasPrice,
-  });
+  try {
+    console.log(
+      `call liquidationContract.liquidate(${unhealthyAccount.address}) from ${myAccount}`
+    );
+    const liquidationTx = liquidationContract.methods.liquidate(
+      unhealthyAccount.address
+    );
+    const liquidationTxObj = await liquidationTx.send({
+      from: myAccount,
+      gasLimit: 300000,
+      gasPrice,
+    });
 
-  // TODO: for now, this account should have enough arUSD manually deposited by human
-  // TODO: implement the mechanism to convert liquidated funds into arUSD or into USDT - the point when to do it - do it instantly?
-  console.log('liquidation finished', liquidationTxObj);
+    // TODO: for now, this account should have enough arUSD manually deposited by human
+    // TODO: implement the mechanism to convert liquidated funds into arUSD or into USDT - the point when to do it - do it instantly?
+    console.log('liquidation finished', liquidationTxObj);
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 exports.flagAccount = async (unhealthyAccount) => {
