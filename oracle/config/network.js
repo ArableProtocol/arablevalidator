@@ -14,4 +14,12 @@ exports.setup = function () {
   return new Web3(fuji_url);
 };
 
+exports.getBackendApiUrl = function () {
+  const chainId = Number(process.env.CHAIN_ID || '43113');
+  if (chainId == 43114) {
+    return 'https://api.arable.finance/api';
+  }
+  return 'https://api.fuji.arable.finance/api';
+};
+
 exports.getNetwork = getNetwork;

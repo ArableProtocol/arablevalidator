@@ -12,6 +12,7 @@ let ids = [
   'raydium',
   'polkadot',
   'truefi',
+  'cosmos',
 ];
 let url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
 

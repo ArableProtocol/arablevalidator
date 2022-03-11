@@ -7,26 +7,61 @@ const { coingecko_prices } = require('./coingecko');
 const { collect_terra } = require('./terra');
 
 async function collect() {
-  console.log('collecting coingecko prices');
-  const coingecko = await coingecko_prices();
+  let coingecko = {},
+    bsc = {},
+    solana = {},
+    osmosis = {},
+    eth = {},
+    poly = {},
+    terra = {};
+  try {
+    console.log('collecting coingecko prices');
+    coingecko = await coingecko_prices();
+  } catch (error) {
+    console.error(error);
+  }
 
-  console.log('collecting bsc information');
-  const bsc = await collect_bsc();
+  try {
+    console.log('collecting bsc information');
+    bsc = await collect_bsc(coingecko);
+  } catch (error) {
+    console.error(error);
+  }
 
-  console.log('collecting solana information');
-  const solana = await collect_solana();
+  try {
+    console.log('collecting solana information');
+    solana = await collect_solana(coingecko);
+  } catch (error) {
+    console.error(error);
+  }
 
-  console.log('collecting osmosis information');
-  const osmosis = await collect_osmosis();
+  try {
+    console.log('collecting osmosis information');
+    osmosis = await collect_osmosis(coingecko);
+  } catch (error) {
+    console.error(error);
+  }
 
-  console.log('collecting ethereum information');
-  const eth = await collect_eth();
+  try {
+    console.log('collecting ethereum information');
+    eth = await collect_eth(coingecko);
+  } catch (error) {
+    console.error(error);
+  }
 
-  console.log('collecting polygon information');
-  const poly = await collect_polygon();
+  try {
+    console.log('collecting polygon information');
+    poly = await collect_polygon(coingecko);
+  } catch (error) {
+    console.error(error);
+  }
 
-  console.log('collecting terra information');
-  const terra = await collect_terra();
+  try {
+    console.log('collecting terra information');
+    terra = await collect_terra(coingecko);
+  } catch (error) {
+    console.error(error);
+  }
 
   return {
     coingecko,

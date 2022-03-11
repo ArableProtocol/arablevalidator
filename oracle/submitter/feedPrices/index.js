@@ -1,7 +1,7 @@
 const { getAddresses } = require('../../config/address');
 const { setBulkPrice } = require('../utils/setBulkPrice');
 
-async function feedPrices(state) {
+async function feedPrices(state, beaconRewardRate) {
   try {
     const {
       arBNB,
@@ -25,30 +25,41 @@ async function feedPrices(state) {
       arOsmosisATOMOSMO,
     } = await getAddresses();
     const bnbPrice = state.coingecko.prices.binancecoin.usd;
-    const cakePrice = state.bsc.pancakeswap.cakeBnb.cakePrice;
-    const busdBNBLpPrice =
-      state.bsc.pancakeswap.busdBnb.busdBnbLpTokenPrice.lpTokenPrice;
-    const cakeBNBLpPrice =
-      state.bsc.pancakeswap.cakeBnb.cakeBnbLpTokenPrice.lpTokenPrice;
+    const cakePrice = state.coingecko.prices['pancakeswap-token'].usd;
+    const busdBNBLpPrice = state.bsc.pancakeswap.busdBnb.busdBnbLpTokenPrice;
+    const cakeBNBLpPrice = state.bsc.pancakeswap.cakeBnb.cakeBnbLpTokenPrice;
     const sushiPrice = state.coingecko.prices.sushi.usd;
     const solPrice = state.coingecko.prices.solana.usd;
     const osmoPrice = state.coingecko.prices.osmosis.usd;
     const quickPrice = state.coingecko.prices.quick.usd;
-    const crvPrice = state.eth.ethdata.threePool.crvPrice;
+    const crvPrice = state.coingecko.prices['curve-dao-token'].usd;
     const rayPrice = state.coingecko.prices.raydium.usd;
     const dotPrice = state.coingecko.prices.polkadot.usd;
     const truPrice = state.coingecko.prices.truefi.usd;
-    const raydiumRAYSOLPrice = state.solana.raydium.raySol.lp_price;
-    const raydiumRAYUSDTPrice = state.solana.raydium.rayUsdt.lp_price;
+
+    const raydiumRAYSOLPrice =
+      beaconRewardRate.syntheticFarms?.raySol?.lpTokenPrice ||
+      state.solana.raydium?.raySol?.lp_price;
+    const raydiumRAYUSDTPrice =
+      beaconRewardRate.syntheticFarms?.rayUsdt?.lpTokenPrice ||
+      state.solana.raydium.rayUsdt.lp_price;
     const uniswapETHUSDTPrice =
-      state.eth.ethdata.ethUsdt.ethUsdtLpTokenPrice.lpTokenPrice;
+      beaconRewardRate.syntheticFarms?.uniswapEthUsdt?.lpTokenPrice ||
+      state.eth.uniswap.ethUsdt.ethUsdtLpTokenPrice;
     const sushiswapETHTRUPrice =
-      state.eth.ethdata.ethTru.truEthLpTokenPrice.lpTokenPrice;
+      beaconRewardRate.syntheticFarms?.ethTru?.truEthLpTokenPrice ||
+      state.eth.sushiswap.ethTru.truEthLpTokenPrice;
+
     const quickswapETHQUICKPrice =
-      state.poly.polygonData.quickEth.quickEthLpTokenPrice;
+      beaconRewardRate.syntheticFarms?.quickEth?.quickEthLpTokenPrice ||
+      state.poly.polygonData.quickEth.quickEthLpTokenPrice / 1;
     const quickswapETHUSDCPrice =
-      state.poly.polygonData.ethUsdc.ethUsdcLpTokenPrice;
-    const atomOsmoLpTokenPrice = state.osmosis.atomOsmoLpTokenPrice;
+      beaconRewardRate.syntheticFarms?.quickEthUsdc?.ethUsdcLpTokenPrice ||
+      state.poly.polygonData.ethUsdc.ethUsdcLpTokenPrice / 1;
+
+    const atomOsmoLpTokenPrice =
+      beaconRewardRate.syntheticFarms?.atomOsmo?.lpTokenPrice ||
+      state.osmosis.atomOsmoLpTokenPrice;
 
     /**user readable price -- end **/
     /**Array of all address**/
@@ -95,6 +106,8 @@ async function feedPrices(state) {
       sushiswapETHTRUPrice,
       atomOsmoLpTokenPrice,
     ];
+
+    console.log('priceArray', priceArray);
 
     await setBulkPrice(tokensArray, priceArray);
   } catch (error) {

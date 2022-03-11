@@ -22,7 +22,7 @@ exports.setBulkRewardRate = async function (
 
   // cut decimals if too low
   dailyRewardRates = dailyRewardRates.map((rate) =>
-    web3.utils.toHex(web3.utils.toWei(`${parseInt(rate * 1e18)}`, 'wei'))
+    web3.utils.toWei(`${parseInt(rate * 1e18)}`, 'wei')
   );
   const setFarmReward = oracleContract.methods.bulkRegisterRewardRate(
     farmId,
@@ -31,7 +31,7 @@ exports.setBulkRewardRate = async function (
   );
   const txObj = await setFarmReward.send({
     from: myAccount,
-    gasLimit: web3.utils.toHex(500000),
+    gasLimit: 500000,
     gasPrice,
   });
   console.log('Success!', txObj.transactionHash);

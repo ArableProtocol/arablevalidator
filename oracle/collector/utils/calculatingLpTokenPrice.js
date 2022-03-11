@@ -5,13 +5,19 @@ function calculateLpTokenPrice(
   tokenTwoPrice,
   totalSupply
 ) {
-  const totalLiquidity =
-    tokenOneSupply * tokenOnePrice + tokenTwoSupply * tokenTwoPrice;
+  const tokenOneLiquidity = tokenOneSupply * tokenOnePrice;
+  const tokenTwoLiquidity = tokenTwoSupply * tokenTwoPrice;
+
+  if (
+    tokenOneLiquidity < tokenTwoLiquidity * 0.9 ||
+    tokenOneLiquidity > tokenTwoLiquidity * 1.1
+  ) {
+    throw 'parameters are incorrect for liquidity price calculation!';
+  }
+  const totalLiquidity = tokenOneLiquidity + tokenTwoLiquidity;
   const lpTokenPrice = totalLiquidity / totalSupply;
 
-  return {
-    lpTokenPrice,
-  };
+  return lpTokenPrice;
 }
 
 exports.calculateLpTokenPrice = calculateLpTokenPrice;

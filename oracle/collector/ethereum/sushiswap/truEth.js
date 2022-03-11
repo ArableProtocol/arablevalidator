@@ -24,7 +24,7 @@ const {
 } = require('../../libs/address');
 const web3 = new Web3(eth_url);
 
-async function uniSwap_eth_tru_collector() {
+async function sushiswap_eth_tru_collector(coingecko) {
   try {
     const truPoolContract = new web3.eth.Contract(
       truPoolReward_abi,
@@ -46,47 +46,61 @@ async function uniSwap_eth_tru_collector() {
       priceFeedEthAddress
     );
     //getting tru.
+    const truDecimals = await truContract.methods.decimals().call();
     const truRewardPerSecondDecimals = await truPoolContract.methods
       .rewardPerSecond()
       .call();
-    const truRewardPerDay = (new BigNumber(truRewardPerSecondDecimals).div(new BigNumber(Math.pow(10, 18)))).times(new BigNumber(86400)); //multiply by total seconds in a day
+    const truRewardPerDay = new BigNumber(truRewardPerSecondDecimals)
+      .div(new BigNumber(Math.pow(10, truDecimals)))
+      .times(new BigNumber(86400)); //multiply by total seconds in a day
     //getting sushi allocated to pool
     const poolInfo = await masterContract.methods.poolInfo(8).call();
     const totalPoolAllocation = await masterContract.methods
       .totalAllocPoint()
       .call();
-    const sushiPerBlock = new BigNumber(await masterContract.methods.sushiPerBlock().call());
+    const sushiPerBlock = new BigNumber(
+      await masterContract.methods.sushiPerBlock().call()
+    );
     const poolAllocation = new BigNumber(poolInfo.allocPoint);
-    const poolAllocationPercent = (poolAllocation.times(new BigNumber(100))).div(new BigNumber(totalPoolAllocation));
-    const poolSushiRewardPerBlock =
-      (poolAllocationPercent.times(sushiPerBlock)).div(new BigNumber( 1e20));
+    const poolAllocationPercent = poolAllocation
+      .times(new BigNumber(100))
+      .div(new BigNumber(totalPoolAllocation));
+    const poolSushiRewardPerBlock = poolAllocationPercent
+      .times(sushiPerBlock)
+      .div(new BigNumber(1e20));
     //live Price of Tru
     const truPriceRoundData = await priceTruContract.methods
       .latestRoundData()
       .call();
     const truPriceRoundAnswer = await truPriceRoundData.answer;
     const truPriceDecimals = await priceTruContract.methods.decimals().call();
-    const truPrice =
-     new BigNumber(await truPriceRoundAnswer).div(new BigNumber(Math.pow(10, truPriceDecimals)));
+    const truPrice = new BigNumber(await truPriceRoundAnswer).div(
+      new BigNumber(Math.pow(10, truPriceDecimals))
+    );
     //live Price of ETH
     const ethPriceRoundData = await priceEthContract.methods
       .latestRoundData()
       .call();
     const ethPriceRoundAnswer = await ethPriceRoundData.answer;
     const ethPriceDecimals = await priceEthContract.methods.decimals().call();
-    const ethPrice =
-     new BigNumber(await ethPriceRoundAnswer).div(new BigNumber(Math.pow(10, ethPriceDecimals)));
+    const ethPrice = new BigNumber(await ethPriceRoundAnswer).div(
+      new BigNumber(Math.pow(10, ethPriceDecimals))
+    );
     //checking supply of the pool
     const totalSupplyPool = await poolContract.methods.totalSupply().call();
     const totalSupplyDecimals = await poolContract.methods.decimals().call();
-    const totalSupply =
-     new BigNumber(await totalSupplyPool).div(new BigNumber(Math.pow(10, totalSupplyDecimals)));
+    const totalSupply = new BigNumber(await totalSupplyPool).div(
+      new BigNumber(Math.pow(10, totalSupplyDecimals))
+    );
     //getting total number of eth and tru
     const ethDecimals = await ethContract.methods.decimals().call();
-    const truDecimals = await truContract.methods.decimals().call();
     const reserves = await poolContract.methods.getReserves().call();
-    const totalEth = new BigNumber(await reserves[0]).div(new BigNumber(Math.pow(10, ethDecimals)));
-    const totalTru = new BigNumber(await reserves[1]).div(new BigNumber(Math.pow(10, truDecimals)));
+    const totalEth = new BigNumber(await reserves[1]).div(
+      new BigNumber(Math.pow(10, ethDecimals))
+    );
+    const totalTru = new BigNumber(await reserves[0]).div(
+      new BigNumber(Math.pow(10, truDecimals))
+    );
     //calculating total liquidity
     const lpTokenPrice = await calculateLpTokenPrice(
       totalEth,
@@ -95,16 +109,40 @@ async function uniSwap_eth_tru_collector() {
       truPrice,
       totalSupply
     );
-    //console.log(`Eth price ${ethPrice}, Tru price ${truPrice}, LP token price: ${lpTokenPrice}, ${poolAllocationPercent} sushi per block. Sushi allocated to TRU/ETH ${poolSushiRewardPerBlock}. Tru reward per second: ${truRewardPerDay}`)
+    console.log(
+      `Tru price ${truPrice}, LP token price: ${lpTokenPrice}, ${poolAllocationPercent} sushi per block. Sushi allocated to TRU/ETH ${poolSushiRewardPerBlock}. Tru reward per second: ${truRewardPerDay}`
+    );
+    const numberOfBlocksPerDay = 6480.0;
 
-    return {
-      poolAllocationPercent,
-      poolSushiRewardPerBlock,
-      truRewardPerDay,
-      truPrice,
-      ethPrice,
-      truEthLpTokenPrice: lpTokenPrice,
-    };
+    try {
+      const sushiRewardPerDay = poolSushiRewardPerBlock * numberOfBlocksPerDay;
+      // console.log('truRewardPerDay', truRewardPerDay / 1);
+      // console.log('poolSushiRewardPerDay', sushiRewardPerDay);
+      const sushiDailyRewardRate = sushiRewardPerDay / totalSupply;
+      const truDailyRewardRate = truRewardPerDay / totalSupply;
+
+      const sushiAPR =
+        (sushiDailyRewardRate * 365 * coingecko.prices['sushi'].usd) /
+        lpTokenPrice;
+      const truAPR =
+        (truDailyRewardRate * 365 * coingecko.prices['truefi'].usd) /
+        lpTokenPrice;
+
+      // console.log('sushiAPR', sushiAPR);
+      // console.log('truAPR', truAPR);
+
+      return {
+        sushiRewardPerDay,
+        truRewardPerDay,
+        sushiDailyRewardRate,
+        truDailyRewardRate,
+        sushiAPR,
+        truAPR,
+        truEthLpTokenPrice: lpTokenPrice,
+      };
+    } catch (err) {
+      console.error(err);
+    }
   } catch (error) {}
 }
-exports.uniSwap_eth_tru_collector = uniSwap_eth_tru_collector;
+exports.sushiswap_eth_tru_collector = sushiswap_eth_tru_collector;
