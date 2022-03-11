@@ -52,7 +52,7 @@ Provide the contract address for your validator. You can find it by going to htt
 
 #### IS_PRIMARY_FULL_NODE
 
-This is for future use and you can leave it empty for now.
+This is for full node configuration that is run by internal team. Validators are not running this to reduce gas fee.
 
 ```
 nano .env
