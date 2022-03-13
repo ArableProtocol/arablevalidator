@@ -11,10 +11,10 @@ async function runPriceStabilizer() {
   );
   const provider = new providers.JsonRpcProvider('');
 
-  const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-  const arUSD = '0xdac17f958d2ee523a2206206994597c13d831ec7';
+  const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'; // TODO: to be updated with new address
+  const arUSD = '0xF01d1b172b008d052C3dbA3A57c21FFd705d49a7'; // mvp arUSD address
   const executorAddress = '';
-  const factoryContractAddress = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f';
+  const factoryContractAddress = ''; // TODO: to be set
 
   const factoryContract = new Contract(
     factoryContractAddress,
@@ -45,15 +45,15 @@ async function runPriceStabilizer() {
   // bytes: data.length is greater than 0, the contract transfers the tokens and then calls the following function on the to address:
   console.log('checking..');
   if (priceOfArUSD <= 0.98) {
-    // buy arUSD
+    // buy 10000 arUSD
     const bytes = ethers.utils.toUtf8Bytes('2');
-    const amount0Out = 500;
+    const amount0Out = 10000;
     const amount1Out = 250;
     uniswapstablecoins.swap(amount0Out, amount1Out, executorAddress, bytes);
   } else if (priceOfArUSD >= 1.02) {
-    // sell arUSD
+    // sell 10000 arUSD
     const bytes = ethers.utils.toUtf8Bytes('2');
-    const amount0Out = 500;
+    const amount0Out = 10000;
     const amount1Out = 250;
     uniswapstablecoins.swap(amount0Out, amount1Out, executorAddress, bytes);
   } else {
@@ -65,7 +65,8 @@ async function runPriceStabilizer() {
 }
 
 async function main() {
-  await nodeCron.schedule(' 1 1 * * *', async function () {
+  // run the script every hour
+  await nodeCron.schedule('1 * * * *', async function () {
     await runPriceStabilizer();
   });
 }
