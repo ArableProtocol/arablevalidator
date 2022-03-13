@@ -7,7 +7,12 @@ const { setup } = require('./config/network');
 
 const { waitSeconds } = require('../utils/wait');
 
-const { arUSD, USDT, pairUSDTarUSD } = require('./config/address.js');
+const {
+  arUSD,
+  USDT,
+  pairUSDTarUSD,
+  liquidation,
+} = require('./config/address.js');
 const { parseEther } = require('ethers/lib/utils');
 
 const web3 = setup();
