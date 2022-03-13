@@ -40,7 +40,6 @@ exports.approveArUSDForLiquidation = async () => {
     return;
   }
 
-  // TODO: approve only once if it's not approved already
   console.log('approving arUSD to be used for liquidation');
   // approve holding arUSD to be used for liquidation
   const approveTx = arUSDContract.methods.approve(

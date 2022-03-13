@@ -1,33 +1,85 @@
 const nodeCron = require('node-cron');
 require('dotenv').config();
-const { Contract, providers, Wallet, utils, BigNumber } = require('ethers');
-const { UNISWAP_PAIR_ABI, FACTORY_UNI } = require('./ABI');
+const {
+  ethers,
+  Contract,
+  providers,
+  Wallet,
+  utils,
+  BigNumber,
+} = require('ethers');
+const pangolin_pair_abi = require('./abis/pangolin_pair_abi');
+const erc20_abi = require('./abis/erc20_abi');
+
+const { setup } = require('./config/network');
+
 const { waitSeconds } = require('../utils/wait');
+
+const { arUSD, USDT, pairUSDTarUSD } = require('./config/address.js');
+const { parseEther } = require('ethers/lib/utils');
+
+const web3 = setup();
+
+async function approveToken(token) {
+  console.log(`approving token`);
+
+  // initiate the account
+  const account = web3.eth.accounts.privateKeyToAccount(
+    process.env.PRIVATE_KEY
+  );
+  await web3.eth.accounts.wallet.add(account);
+  const myAccount = account.address;
+  const gasPrice = await web3.eth.getGasPrice();
+
+  console.log('initiate the contracts with abi and contract address');
+  // initiate the contracts with abi and contract address
+  const tokenContract = new web3.eth.Contract(erc20_abi, token);
+
+  const allowanceCall = await tokenContract.methods.allowance(
+    myAccount,
+    liquidation
+  );
+  let allowance = await allowanceCall.call();
+
+  if (BigNumber.from(allowance).gte(parseEther('10000000'))) {
+    console.log('already allowed and skipping');
+    return;
+  }
+
+  console.log('approving token');
+  const approveTx = tokenContract.methods.approve(
+    liquidation,
+    ethers.constants.MaxUint256.toString()
+  );
+
+  const approveTxObj = await approveTx.send({
+    from: myAccount,
+    gasLimit: 300000,
+    gasPrice,
+  });
+
+  console.log('approval finished', approveTxObj);
+}
 
 async function runPriceStabilizer() {
   console.log('----- arUSD stability maintainer, in progress code -----');
   console.log(
     '================ starting arUSD stability maintainer ================'
   );
-  const provider = new providers.JsonRpcProvider('');
 
-  const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'; // TODO: to be updated with new address
-  const arUSD = '0xF01d1b172b008d052C3dbA3A57c21FFd705d49a7'; // mvp arUSD address
-  const executorAddress = '';
-  const factoryContractAddress = ''; // TODO: to be set
-
-  const factoryContract = new Contract(
-    factoryContractAddress,
-    FACTORY_UNI.abi,
-    provider
+  // initiate the account
+  const account = web3.eth.accounts.privateKeyToAccount(
+    process.env.PRIVATE_KEY
   );
+  await web3.eth.accounts.wallet.add(account);
+  const myAccount = account.address;
+  const gasPrice = await web3.eth.getGasPrice();
 
   // check pair price
-  const pair = await factoryContract.getPair(USDC, arUSD);
-  const uniswapstablecoins = new Contract(pair, UNISWAP_PAIR_ABI, provider);
+  const pairContract = new Contract(pairUSDTarUSD, pangolin_pair_abi, provider);
 
   // function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
-  const stables = await uniswapstablecoins.getReserves();
+  const stables = await pairContract.getReserves();
 
   const reserve0 = Number(utils.formatUnits(stables[0], 6));
   const reserve1 = Number(utils.formatUnits(stables[1], 6));
@@ -36,26 +88,48 @@ async function runPriceStabilizer() {
 
   console.log('arUSD price', priceOfArUSD);
 
-  const gasPrice = await provider.getGasPrice();
-  const amtInGwei = utils.formatUnits(gasPrice, 'gwei');
-  console.log('amtInGwei', amtInGwei);
-
   // function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external;
-  // for flash swap
   // bytes: data.length is greater than 0, the contract transfers the tokens and then calls the following function on the to address:
   console.log('checking..');
   if (priceOfArUSD <= 0.98) {
     // buy 10000 arUSD
     const bytes = ethers.utils.toUtf8Bytes('2');
-    const amount0Out = 10000;
-    const amount1Out = 250;
-    uniswapstablecoins.swap(amount0Out, amount1Out, executorAddress, bytes);
+    const amount0In = parseEther('10000');
+    const amount1Out = 0;
+    const swapTx = pairContract.swap(
+      amount0In,
+      amount1Out,
+      executorAddress,
+      bytes
+    );
+
+    const swapTxObj = await swapTx.send({
+      from: myAccount,
+      gasLimit: 300000,
+      gasPrice,
+    });
+
+    console.log('swap finished', swapTxObj);
   } else if (priceOfArUSD >= 1.02) {
     // sell 10000 arUSD
     const bytes = ethers.utils.toUtf8Bytes('2');
-    const amount0Out = 10000;
-    const amount1Out = 250;
-    uniswapstablecoins.swap(amount0Out, amount1Out, executorAddress, bytes);
+    const amount0In = 0;
+    const amount1Out = parseEther('10000');
+
+    const swapTx = pairContract.swap(
+      amount0In,
+      amount1Out,
+      executorAddress,
+      bytes
+    );
+
+    const swapTxObj = await swapTx.send({
+      from: myAccount,
+      gasLimit: 300000,
+      gasPrice,
+    });
+
+    console.log('swap finished', swapTxObj);
   } else {
     console.log('no action required for price stability');
   }
@@ -66,9 +140,16 @@ async function runPriceStabilizer() {
 
 async function main() {
   // run the script every hour
-  await nodeCron.schedule('1 * * * *', async function () {
+  // await nodeCron.schedule('1 * * * *', async function () {
+  //   await runPriceStabilizer();
+  // });
+  await approveToken(arUSD);
+  await approveToken(USDT);
+
+  while (1 == 1) {
     await runPriceStabilizer();
-  });
+    await waitSeconds(60);
+  }
 }
 
 main();
