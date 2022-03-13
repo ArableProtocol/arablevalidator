@@ -4,73 +4,153 @@ const { setBulkRewardRate } = require('../utils/setBulkRewardRate');
 const { farms } = require('../config');
 const { getAddresses } = require('../../config/address');
 
-function convertToFormalRewardRates(state) {
+function convertToFormalRewardRates(state, beaconRewardRate) {
   return [
     {
-      farmId: 0,
+      farmId: 0, // OSMO staking
       rewardTokenSymbols: ['arOSMO'],
-      rewardRates: [state.osmosis.osmoStakingRewardsApr],
+      rewardRates: [
+        beaconRewardRate.syntheticFarms?.osmoStaking?.dailyRewardRate ||
+          state.osmosis.osmoStakingDailyRewardRate,
+      ],
+      APRs: [
+        beaconRewardRate.syntheticFarms?.osmoStaking?.apr ||
+          state.osmosis.osmoStakingRewardsApr,
+      ],
     },
     {
-      farmId: 1,
+      farmId: 1, // ATOM-OSMO LPing
       rewardTokenSymbols: ['arOSMO'],
-      rewardRates: [state.osmosis.atomOsmoLpTokenReward14DaysBondedApr],
+      rewardRates: [
+        beaconRewardRate.syntheticFarms?.atomOsmo?.dailyRewardRate ||
+          state.osmosis.atomOsmoLpTokenDailyRewardRate,
+      ],
+      APRs: [
+        beaconRewardRate.syntheticFarms?.atomOsmo?.apr ||
+          state.osmosis.atomOsmoLpTokenReward14DaysBondedApr,
+      ],
     },
     {
       farmId: 2,
       rewardTokenSymbols: ['arCAKE'],
-      rewardRates: [state.bsc.pancakeswap.cakeBnb.poolCakeRewardsPerBlock],
+      rewardRates: [
+        beaconRewardRate.syntheticFarms?.cakeBnb?.dailyRewardRate ||
+          state.bsc.pancakeswap.cakeBnb.poolDailyRewardRate,
+      ],
+      APRs: [
+        beaconRewardRate.syntheticFarms?.cakeBnb?.apr ||
+          state.bsc.pancakeswap.cakeBnb.poolAPR,
+      ],
     },
     {
       farmId: 3,
       rewardTokenSymbols: ['arCAKE'],
-      rewardRates: [state.bsc.pancakeswap.busdBnb.poolCakeRewardsPerBlock],
+      rewardRates: [
+        beaconRewardRate.syntheticFarms?.busdBnb?.dailyRewardRate ||
+          state.bsc.pancakeswap.busdBnb.poolDailyRewardRate,
+      ],
+      APRs: [
+        beaconRewardRate.syntheticFarms?.busdBnb?.apr ||
+          state.bsc.pancakeswap.busdBnb.poolAPR,
+      ],
     },
     {
       farmId: 4,
       rewardTokenSymbols: ['arQUICK'],
-      rewardRates: [state.poly.polygonData.ethUsdc.rewardRate],
+      rewardRates: [
+        beaconRewardRate.syntheticFarms?.quickEthUsdc?.dailyRewardRate ||
+          state.poly.polygonData.ethUsdc.dailyRewardRate,
+      ],
+      APRs: [
+        beaconRewardRate.syntheticFarms?.quickEthUsdc?.apr ||
+          state.poly.polygonData.ethUsdc.apr,
+      ],
     },
     {
       farmId: 5,
       rewardTokenSymbols: ['arQUICK'],
-      rewardRates: [state.poly.polygonData.quickEth.rewardRate],
+      rewardRates: [
+        beaconRewardRate.syntheticFarms?.quickEth?.dailyRewardRate ||
+          state.poly.polygonData.quickEth.dailyRewardRate,
+      ],
+      APRs: [
+        beaconRewardRate.syntheticFarms?.quickEth?.apr ||
+          state.poly.polygonData.quickEth.apr,
+      ],
     },
     {
       farmId: 6,
       rewardTokenSymbols: ['arRAY'],
-      rewardRates: [state.solana.raydium.raySol.apy], // TODO: this is incorrect value fix after Chris' work
+      rewardRates: [
+        beaconRewardRate.syntheticFarms?.raySol?.dailyRewardRate ||
+          state.solana.raydium?.raySol?.dailyRewardRate,
+      ],
+      APRs: [
+        beaconRewardRate.syntheticFarms?.raySol?.aprChain ||
+          state.solana.raydium?.raySol?.aprChain,
+      ],
     },
     {
       farmId: 7,
       rewardTokenSymbols: ['arRAY'],
-      rewardRates: [state.solana.raydium.rayUsdt.apy], // TODO: this is incorrect value fix after Chris' work
+      rewardRates: [
+        beaconRewardRate.syntheticFarms?.rayUsdt?.dailyRewardRate ||
+          state.solana.raydium?.rayUsdt?.dailyRewardRate,
+      ],
+      APRs: [
+        beaconRewardRate.syntheticFarms?.rayUsdt?.aprChain ||
+          state.solana.raydium?.rayUsdt?.aprChain,
+      ],
     },
     {
       farmId: 9,
       rewardTokenSymbols: ['arCRV'],
-      rewardRates: [state.eth.ethdata.threePool.threePoolReward], // TODO: make it correct
+      rewardRates: [
+        beaconRewardRate.syntheticFarms?.curveThreePool?.dailyRewardRate ||
+          state.eth.curve.threePool.dailyRewardRate,
+      ],
+      APRs: [
+        beaconRewardRate.syntheticFarms?.curveThreePool?.apr ||
+          state.eth.curve.threePool.apr,
+      ],
     },
     {
       farmId: 10,
       rewardTokenSymbols: ['arSUSHI', 'arTRU'],
       rewardRates: [
-        state.eth.ethdata.ethTru.poolSushiRewardPerBlock,
-        state.eth.ethdata.ethTru.truRewardPerDay,
-      ], // TODO: make it correct
+        beaconRewardRate.syntheticFarms?.ethTru?.sushiDailyRewardRate ||
+          state.eth.sushiswap.ethTru.sushiDailyRewardRate,
+        beaconRewardRate.syntheticFarms?.ethTru?.truDailyRewardRate ||
+          state.eth.sushiswap.ethTru.truDailyRewardRate,
+      ],
+      APRs: [
+        beaconRewardRate.syntheticFarms?.ethTru?.sushiAPR ||
+          state.eth.sushiswap.ethTru.sushiAPR,
+        beaconRewardRate.syntheticFarms?.ethTru?.truAPR ||
+          state.eth.sushiswap.ethTru.truAPR,
+      ],
     },
     {
       farmId: 11,
       rewardTokenSymbols: ['arUSD'],
-      rewardRates: [state.eth.ethdata.usdtAave.currentLendingRate],
+      rewardRates: [
+        beaconRewardRate.syntheticFarms?.usdtAave?.dailyRewardRate ||
+          state.eth.aave.usdtAave.dailyRewardRate,
+      ],
+      APRs: [
+        beaconRewardRate.syntheticFarms?.usdtAave?.lendingAPR ||
+          state.eth.aave.usdtAave.lendingAPR,
+      ],
     },
   ];
 }
 
-async function feedRewardRates(state) {
+async function feedRewardRates(state, beaconRewardRate) {
   try {
     const addresses = await getAddresses();
-    const farmRewardRates = convertToFormalRewardRates(state);
+    const farmRewardRates = convertToFormalRewardRates(state, beaconRewardRate);
+    console.log('farmRewardRates', farmRewardRates);
+
     for (let i = 0; i < farmRewardRates.length; i++) {
       const farm = farmRewardRates[i];
       console.log(

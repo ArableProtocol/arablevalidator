@@ -1,7 +1,7 @@
 const { collect_quickswap } = require('./quickSwap');
 
-async function collect_polygon() {
-  const polygonData = await collect_quickswap();
+async function collect_polygon(coingecko) {
+  const polygonData = await collect_quickswap(coingecko);
   return {
     polygonData,
   };

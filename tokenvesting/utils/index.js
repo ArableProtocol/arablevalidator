@@ -1,4 +1,10 @@
-const { setup } = require('../config/network');
+const axios = require('axios');
+const { Wallet } = require('ethers');
+const {
+  setup,
+  getBackendApiUrl,
+  getEthersProvider,
+} = require('../config/network');
 const {
   arable_vesting,
   root_distributer,
@@ -17,6 +23,44 @@ const BigNumber = require('bignumber.js');
 
 const web3 = setup();
 
+const getReleasableAmount = (
+  totalReleased,
+  startTime,
+  startAmount,
+  numerator,
+  divider,
+  totalAmount
+) => {
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+  const ONE_YEAR = 365 * 24 * 3600;
+  const yearIndex = Math.floor((currentTimestamp - startTime) / ONE_YEAR);
+
+  let yearAmount = new BigNumber(startAmount);
+
+  let pastYearsAmount = new BigNumber(0);
+  for (let index = 0; index < yearIndex; index++) {
+    pastYearsAmount = pastYearsAmount.plus(yearAmount);
+    yearAmount = yearAmount.times(numerator).div(divider);
+  }
+
+  let currentYearAmount = yearAmount
+    .times(new BigNumber(currentTimestamp - yearIndex * ONE_YEAR - startTime))
+    .div(ONE_YEAR);
+  const releasableAmount = pastYearsAmount
+    .plus(currentYearAmount)
+    .minus(totalReleased);
+
+  const releasableEther = releasableAmount
+    .div(new BigNumber(Math.pow(10, 18)))
+    .toFixed(0);
+
+  console.log('==releasableAcre=', releasableEther);
+
+  const isReleasable = releasableEther >= 40000;
+
+  return isReleasable;
+};
+
 // - ArableVesting.release - daily - any user
 exports.releaseVesting = async function () {
   const account = web3.eth.accounts.privateKeyToAccount(
@@ -30,15 +74,39 @@ exports.releaseVesting = async function () {
     arable_vesting_abi,
     arable_vesting
   );
+  console.log('releaseVesting');
+  const totalReleased = await arableVesting.methods.totalReleased.call().call();
+  const startTime = await arableVesting.methods.startTime.call().call();
+  const startAmount = await arableVesting.methods.startAmount.call().call();
+  const numerator = await arableVesting.methods.numerator.call().call();
+  const divider = await arableVesting.methods.divider.call().call();
+  const totalAmount = await arableVesting.methods.totalAmount.call().call();
+  const isReleasable = getReleasableAmount(
+    totalReleased,
+    startTime,
+    startAmount,
+    numerator,
+    divider,
+    totalAmount
+  );
 
-  const releaseVesting = arableVesting.methods.release();
-  const txObj = await releaseVesting.send({
-    from: myAccount,
-    gasLimit: web3.utils.toHex(300000),
-    gasPrice,
-  });
-  console.log('Success releaseVesting!', txObj.transactionHash);
-  return txObj.transactionHash;
+  if (!isReleasable) {
+    return false;
+  }
+
+  try {
+    const releaseVesting = arableVesting.methods.release();
+    const txObj = await releaseVesting.send({
+      from: myAccount,
+      gasLimit: web3.utils.toHex(300000),
+      gasPrice,
+    });
+    console.log('Success releaseVesting!', txObj.transactionHash);
+    return true;
+  } catch (error) {
+    console.error('releaseVesting error:', error);
+    return false;
+  }
 };
 
 // - RootDistributer.releaseToMemberAll - daily - any user (after release)
@@ -58,7 +126,7 @@ exports.rootDistributerReleaseAll = async function () {
   const releaseToMemberAll = rootDistributer.methods.releaseToMemberAll();
   const txObj = await releaseToMemberAll.send({
     from: myAccount,
-    gasLimit: web3.utils.toHex(300000),
+    gasLimit: web3.utils.toHex(500000),
     gasPrice,
   });
   console.log('Success rootDistributerReleaseAll!', txObj.transactionHash);
@@ -200,7 +268,7 @@ exports.setOTCDeal = async function (
     new BigNumber(Math.pow(10, 18))
   );
   const usdtAmountBN = new BigNumber(usdtAmount).multipliedBy(
-    new BigNumber(Math.pow(10, 18))
+    new BigNumber(Math.pow(10, 6))
   );
 
   const setUserDeal = otcContract.methods.setUserDeal(
@@ -217,4 +285,18 @@ exports.setOTCDeal = async function (
   });
   console.log('Success setOTCDeal!', txObj.transactionHash);
   return txObj.transactionHash;
+};
+
+// - submit online status to backend
+exports.submitStatus = async function (dstaking) {
+  const backendApiUrl = getBackendApiUrl();
+
+  const signer = new Wallet(process.env.PRIVATE_KEY);
+
+  const signature = await signer.signMessage(dstaking);
+
+  await axios.post(`${backendApiUrl}/validators`, {
+    dstaking,
+    signature,
+  });
 };

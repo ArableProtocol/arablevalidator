@@ -7,7 +7,7 @@ function get_pairs() {
     .then((response) => response.data);
 }
 
-async function collect_raydium() {
+async function collect_raydium(coingecko) {
   // api version
   const pairs = ['RAY-SOL', 'RAY-USDT'];
   const keyMapping = {
@@ -31,9 +31,13 @@ async function collect_raydium() {
 
   for (let i = 0; i < pairs.length; i++) {
     const pair = pairs[i];
-    const apr = await raydium.getLpRewardApr(pair);
+    const apr = (await raydium.getLpRewardApr(pair)) || 0;
     response[keyMapping[pair]].aprChain = apr;
-    response[keyMapping[pair]].aprChainPct = (apr * 100.0).toFixed(2) + '%';
+    response[keyMapping[pair]].dailyRewardRate =
+      (apr * response[keyMapping[pair]].lp_price) /
+      coingecko.prices['raydium'].usd /
+      365;
+    response[keyMapping[pair]].aprChainPercent = (apr * 100.0).toFixed(2) + '%';
   }
   return response;
 }

@@ -22,7 +22,7 @@ exports.setBulkPrice = async function (tokenArray, priceArray) {
   );
   const txObj = await setBulkPrice.send({
     from: myAccount,
-    gasLimit: web3.utils.toHex(300000),
+    gasLimit: 3000000,
     gasPrice,
   });
   console.log('Success!', txObj.transactionHash);

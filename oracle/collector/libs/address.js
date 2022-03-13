@@ -39,7 +39,11 @@ const priceFeedCrvAddress = '0xcd627aa160a6fa45eb793d19ef54f5062f20f33f';
 
 //CRV address
 const totalGauageAddress = '0x2F50D538606Fa9EDD2B11E2446BEb18C9D5846bB';
-const gaugeAddress = '0xbFcF63294aD7105dEa65aA58F8AE5BE2D9d0952A';
+const threePoolGaugeAddress = '0xbFcF63294aD7105dEa65aA58F8AE5BE2D9d0952A';
+const threePoolAddress = '0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7';
+const threePoolLPAddress = '0x6c3f90f043a72fa612cbac8115ee7e52bde6e490';
+const usdcAddress = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+const daiAddress = '0x6b175474e89094c44da98b954eedeac495271d0f';
 
 //aave lending address
 const lendingPool = '0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9';
@@ -79,7 +83,11 @@ exports.usdcPolyPriceFeedAddress = usdcPolyPriceFeedAddress;
 exports.ethPolyPriceFeedAddress = ethPolyPriceFeedAddress;
 exports.lendingPool = lendingPool;
 exports.totalGauageAddress = totalGauageAddress;
-exports.gaugeAddress = gaugeAddress;
+exports.threePoolGaugeAddress = threePoolGaugeAddress;
+exports.threePoolAddress = threePoolAddress;
+exports.threePoolLPAddress = threePoolLPAddress;
+exports.usdcAddress = usdcAddress;
+exports.daiAddress = daiAddress;
 exports.panCakeFarmAddress = panCakeFarmAddress;
 exports.busdBNBAddress = busdBNBAddress;
 exports.busdAddress = busdAddress;

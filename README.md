@@ -1,6 +1,9 @@
 # Arable Validator Scripts
 
-## Install dependencies
+## Validator setup
+To get the validator script up and running, follow [these instructions](https://github.com/ArableProtocol/arablevalidator/blob/main/validator.md). Running the validator script is required to collect any rewards.
+
+## Development setup
 
 Install node
 

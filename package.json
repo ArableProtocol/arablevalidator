@@ -15,6 +15,7 @@
     "dayjs": "^1.10.7",
     "dotenv": "^10.0.0",
     "ethereumjs-tx": "^2.1.2",
+    "ethers": "^5.5.3",
     "express": "^4.17.1",
     "fs-extra": "^10.0.0",
     "lodash": "^4.17.21",

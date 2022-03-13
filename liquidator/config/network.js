@@ -7,8 +7,8 @@ function getNetwork() {
 }
 
 exports.setup = function () {
-  const network = getNetwork();
-  if (network == 'avax') {
+  const chainId = Number(process.env.CHAIN_ID || '43113');
+  if (chainId == 43114) {
     return new Web3(avax_url);
   }
   return new Web3(fuji_url);
@@ -21,5 +21,3 @@ exports.getBackendApiUrl = function () {
   }
   return 'https://api.fuji.arable.finance/api';
 };
-
-exports.getNetwork = getNetwork;

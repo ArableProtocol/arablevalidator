@@ -1,50 +1,56 @@
-const deployer = '';
-const oracle = '';
-const farming = '';
-const exchange = '';
-const manager = '';
-const arUSD = '';
-const arBNB = '';
-const arSUSHI = '';
-const arSOL = '';
-const arOSMO = '';
-const arCAKE = '';
-const arQUICK = '';
-const arCRV = '';
-const arRAY = '';
-const arDOT = '';
-const arTRU = '';
-const arOsmosisATOMOSMO = '';
-const arPancakeswapCAKEBNB = '';
-const arPancakeswapBUSDBNB = '';
-const arQuickswapETHUSDC = '';
-const arQuickswapETHQUICK = '';
-const arRaydiumRAYSOL = '';
-const arRaydiumRAYUSDT = '';
-const arUniswapETHUSDT = '';
-const arCurveDAIUSDCUSDT = '';
-const arSushiswapETHTRU = '';
+const deployment = {
+  deployer: '',
+  addressRegistry: '',
+  oracle: '',
+  farming: '',
+  exchange: '',
+  manager: '',
+  collateral: '',
+  liquidation: '',
+  feeCollector: '',
+  arUSD: '',
+  arBNB: '',
+  arSUSHI: '',
+  arSOL: '',
+  arOSMO: '',
+  arCAKE: '',
+  arQUICK: '',
+  arCRV: '',
+  arRAY: '',
+  arDOT: '',
+  arTRU: '',
+  arOsmosisATOMOSMO: '',
+  arPancakeswapCAKEBNB: '',
+  arPancakeswapBUSDBNB: '',
+  arQuickswapETHUSDC: '',
+  arQuickswapETHQUICK: '',
+  arRaydiumRAYSOL: '',
+  arRaydiumRAYUSDT: '',
+  arUniswapETHUSDT: '',
+  arCurveDAIUSDCUSDT: '',
+  arSushiswapETHTRU: '',
+};
 
-exports.farming = farming;
-exports.oracle = oracle;
-exports.arUSD = arUSD;
-exports.arBNB = arBNB;
-exports.arCAKE = arCAKE;
-exports.arPancakeswapBUSDBNB = arPancakeswapBUSDBNB;
-exports.arPancakeswapCAKEBNB = arPancakeswapCAKEBNB;
-exports.arSUSHI = arSUSHI;
-exports.arSOL = arSOL;
-exports.arOSMO = arOSMO;
-exports.arQUICK = arQUICK;
-exports.arCRV = arCRV;
-exports.arRAY = arRAY;
-exports.arDOT = arDOT;
-exports.arTRU = arTRU;
-exports.arOsmosisATOMOSMO = arOsmosisATOMOSMO;
-exports.arQuickswapETHUSDC = arQuickswapETHUSDC;
-exports.arQuickswapETHQUICK = arQuickswapETHQUICK;
-exports.arRaydiumRAYSOL = arRaydiumRAYSOL;
-exports.arRaydiumRAYUSDT = arRaydiumRAYUSDT;
-exports.arUniswapETHUSDT = arUniswapETHUSDT;
-exports.arCurveDAIUSDCUSDT = arCurveDAIUSDCUSDT;
-exports.arSushiswapETHTRU = arSushiswapETHTRU;
+exports.farming = deployment.farming;
+exports.oracle = deployment.oracle;
+exports.arUSD = deployment.arUSD;
+exports.arBNB = deployment.arBNB;
+exports.arCAKE = deployment.arCAKE;
+exports.arPancakeswapBUSDBNB = deployment.arPancakeswapBUSDBNB;
+exports.arPancakeswapCAKEBNB = deployment.arPancakeswapCAKEBNB;
+exports.arSUSHI = deployment.arSUSHI;
+exports.arSOL = deployment.arSOL;
+exports.arOSMO = deployment.arOSMO;
+exports.arQUICK = deployment.arQUICK;
+exports.arCRV = deployment.arCRV;
+exports.arRAY = deployment.arRAY;
+exports.arDOT = deployment.arDOT;
+exports.arTRU = deployment.arTRU;
+exports.arOsmosisATOMOSMO = deployment.arOsmosisATOMOSMO;
+exports.arQuickswapETHUSDC = deployment.arQuickswapETHUSDC;
+exports.arQuickswapETHQUICK = deployment.arQuickswapETHQUICK;
+exports.arRaydiumRAYSOL = deployment.arRaydiumRAYSOL;
+exports.arRaydiumRAYUSDT = deployment.arRaydiumRAYUSDT;
+exports.arUniswapETHUSDT = deployment.arUniswapETHUSDT;
+exports.arCurveDAIUSDCUSDT = deployment.arCurveDAIUSDCUSDT;
+exports.arSushiswapETHTRU = deployment.arSushiswapETHTRU;
