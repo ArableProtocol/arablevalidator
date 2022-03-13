@@ -148,7 +148,12 @@ function collectUnhealthyAccounts(users, globalInfos) {
         const collateralAddress = userCollateral.collateralAsset.address;
         let allowedRate = allowedRateMapping[collateralAddress];
         if (allowedRate.gt(0)) {
-          let collateralValue = BigNumber.from(userCollateral.amount)
+          let normalizedAmount = BigNumber.from(userCollateral.amount)
+            .mul(parseEther('1'))
+            .div(
+              BigNumber.from(Math.pow(10, decimals[collateralAddress] || 18))
+            );
+          let collateralValue = normalizedAmount
             .mul(priceMapping[collateralAddress])
             .div(parseEther('1'));
           maxDebt = maxDebt.add(
