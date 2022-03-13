@@ -1,13 +1,5 @@
-const nodeCron = require('node-cron');
 require('dotenv').config();
-const {
-  ethers,
-  Contract,
-  providers,
-  Wallet,
-  utils,
-  BigNumber,
-} = require('ethers');
+const { ethers, Contract, utils, BigNumber } = require('ethers');
 const pangolin_pair_abi = require('./abis/pangolin_pair_abi');
 const erc20_abi = require('./abis/erc20_abi');
 
@@ -139,13 +131,11 @@ async function runPriceStabilizer() {
 }
 
 async function main() {
-  // run the script every hour
-  // await nodeCron.schedule('1 * * * *', async function () {
-  //   await runPriceStabilizer();
-  // });
+  // approve tokens to be used for stability
   await approveToken(arUSD);
   await approveToken(USDT);
 
+  // run price stabilizer once per min
   while (1 == 1) {
     await runPriceStabilizer();
     await waitSeconds(60);
