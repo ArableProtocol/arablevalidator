@@ -165,7 +165,7 @@ async function runPriceStabilizer() {
     console.log("----- step6 -----");
 
     const swapTx = routerContract.methods.swapExactTokensForTokens(
-      amount1Out,
+      amount1Out.toString(),
       0,
       [arUSD, USDT],
       myAccount,
