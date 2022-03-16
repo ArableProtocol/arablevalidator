@@ -2,8 +2,8 @@
   "scripts": {
     "tokenvesting": "node tokenvesting/index.js",
     "oracle": "node oracle/index.js",
-    "liquidation": "node liquidator/index.js",
-    "arusd_stability": "node arusdstability/index.js"
+    "liquidator": "node liquidator/index.js",
+    "arusdstability": "node arusdstability/index.js"
   },
   "dependencies": {
     "@anchor-protocol/anchor.js": "^2.0.0",
