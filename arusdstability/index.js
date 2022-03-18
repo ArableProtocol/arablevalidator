@@ -18,7 +18,7 @@ const { parseEther } = require('ethers/lib/utils');
 
 const web3 = setup();
 
-async function pairApprove(token) {
+async function approveTokenTo(token, targetAddress) {
   // initiate the account
   const account = web3.eth.accounts.privateKeyToAccount(
     process.env.PRIVATE_KEY
@@ -33,7 +33,7 @@ async function pairApprove(token) {
 
   const allowanceCall = await tokenContract.methods.allowance(
     myAccount,
-    pairUSDTarUSD
+    targetAddress
   );
   let allowance = await allowanceCall.call();
 
@@ -44,7 +44,7 @@ async function pairApprove(token) {
   //
   console.log('approve pair');
   const pairApproveTx = tokenContract.methods.approve(
-    pairUSDTarUSD,
+    targetAddress,
     ethers.constants.MaxUint256.toString()
   );
 
@@ -147,8 +147,10 @@ async function runPriceStabilizer() {
 
 async function main() {
   // approve tokens to be used for stability
-  await pairApprove(arUSD);
-  await pairApprove(USDT);
+  await approveTokenTo(arUSD, pairUSDTarUSD);
+  await approveTokenTo(USDT, pairUSDTarUSD);
+  await approveTokenTo(arUSD, pangolinRouter);
+  await approveTokenTo(USDT, pangolinRouter);
 
   // run price stabilizer once per min
   while (1 == 1) {
