@@ -2,6 +2,7 @@ var axios = require('axios');
 var { BigNumber } = require('ethers');
 var { parseEther } = require('ethers/lib/utils');
 var { formatBigNumber } = require('../utils/format');
+const { decimals } = require('./config/address.js');
 
 exports.fetchUnhealthyAccounts = async function () {
   var round = 0;

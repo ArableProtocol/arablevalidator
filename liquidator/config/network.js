@@ -1,11 +1,6 @@
 const Web3 = require('web3');
 const { fuji_url, avax_url } = require('../../config/config.rpc');
 
-function getNetwork() {
-  const args = process.argv.slice(2);
-  return args[0] || 'fuji';
-}
-
 exports.setup = function () {
   const chainId = Number(process.env.CHAIN_ID || '43113');
   if (chainId == 43114) {
