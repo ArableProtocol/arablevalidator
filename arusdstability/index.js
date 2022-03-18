@@ -41,20 +41,20 @@ async function approveTokenTo(token, targetAddress) {
     console.log('already allowed and skipping');
     return;
   }
-  //
-  console.log('approve pair');
-  const pairApproveTx = tokenContract.methods.approve(
+
+  console.log('approving token');
+  const approveTx = tokenContract.methods.approve(
     targetAddress,
     ethers.constants.MaxUint256.toString()
   );
 
-  const pairApproveTxObj = await pairApproveTx.send({
+  const approveTxObj = await approveTx.send({
     from: myAccount,
     gasLimit: 300000,
     gasPrice,
   });
 
-  console.log('pair approval finished', pairApproveTxObj);
+  console.log('approval finished', approveTxObj);
 }
 
 async function runPriceStabilizer() {
