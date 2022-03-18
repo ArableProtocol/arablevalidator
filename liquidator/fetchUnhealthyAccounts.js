@@ -151,9 +151,7 @@ function collectUnhealthyAccounts(users, globalInfos) {
         if (allowedRate.gt(0)) {
           let normalizedAmount = BigNumber.from(userCollateral.amount)
             .mul(parseEther('1'))
-            .div(
-              BigNumber.from(Math.pow(10, decimals[collateralAddress] || 18))
-            );
+            .div(BigNumber.from(10).pow(decimals[collateralAddress] || 18));
           let collateralValue = normalizedAmount
             .mul(priceMapping[collateralAddress])
             .div(parseEther('1'));
