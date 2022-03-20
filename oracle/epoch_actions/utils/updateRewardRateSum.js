@@ -20,7 +20,7 @@ exports.updateRewardRateSum = async function (farmId, rewardToken) {
   );
   const txObj = await setFarmReward.send({
     from: myAccount,
-    gasLimit: web3.utils.toHex(500000),
+    gasLimit: 1000000,
     gasPrice,
   });
   console.log('Success!', txObj.transactionHash);
