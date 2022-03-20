@@ -1,3 +1,4 @@
+const { parseEther } = require('ethers/lib/utils');
 const { setup } = require('../../config/network');
 const { oracle_abi } = require('../abis/oracle_abi');
 const { getAddresses } = require('../../config/address');
@@ -22,8 +23,9 @@ exports.setBulkRewardRate = async function (
 
   // cut decimals if too low
   dailyRewardRates = dailyRewardRates.map((rate) =>
-    web3.utils.toWei(`${parseInt(rate * 1e18)}`, 'wei')
+    parseEther(parseFloat(rate).toFixed(15))
   );
+  console.log('bulkRegisterRewardRate', farmId, rewardTokens, dailyRewardRates);
   const setFarmReward = oracleContract.methods.bulkRegisterRewardRate(
     farmId,
     rewardTokens,

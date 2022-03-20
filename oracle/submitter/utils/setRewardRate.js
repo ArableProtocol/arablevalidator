@@ -1,3 +1,4 @@
+const { parseEther } = require('ethers/lib/utils');
 const { setup } = require('../../config/network');
 const { oracle_abi } = require('../abis/oracle_abi');
 const { getAddresses } = require('../../config/address');
@@ -16,7 +17,7 @@ exports.setRewardRate = async function (farmId, rewardToken, dailyRewardRate) {
   const oracleContract = new web3.eth.Contract(oracle_abi, oracle);
 
   dailyRewardRate = web3.utils.toHex(
-    web3.utils.toWei(`${dailyRewardRate}`, 'ether')
+    parseEther(parseFloat(dailyRewardRate).toFixed(15))
   );
   const setFarmReward = oracleContract.methods.registerRewardRate(
     farmId,

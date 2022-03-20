@@ -2,6 +2,7 @@ const { collect } = require('./collector');
 const { feed } = require('./submitter');
 const { executeEpoch } = require('./epoch_actions');
 const nodeCron = require('node-cron');
+// const { state } = require('./state');
 require('dotenv').config();
 
 async function main() {

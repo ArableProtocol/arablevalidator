@@ -1,3 +1,4 @@
+const { parseEther } = require('ethers/lib/utils');
 const { setup } = require('../../config/network');
 const { oracle_abi } = require('../abis/oracle_abi');
 const { getAddresses } = require('../../config/address');
@@ -14,7 +15,7 @@ exports.setBulkPrice = async function (tokenArray, priceArray) {
   const gasPrice = await web3.eth.getGasPrice();
   const oracleContract = new web3.eth.Contract(oracle_abi, oracle);
   priceArray = priceArray.map((price) =>
-    web3.utils.toHex(web3.utils.toWei(`${price}`, 'ether'))
+    parseEther(parseFloat(price).toFixed(15))
   );
   const setBulkPrice = oracleContract.methods.bulkPriceSet(
     tokenArray,
