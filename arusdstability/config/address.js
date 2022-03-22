@@ -1,23 +1,23 @@
-const chainId = Number(process.env.CHAIN_ID || "43113");
+const chainId = Number(process.env.CHAIN_ID || '43113');
 
 const contracts = {
   43113: {
     // testnet
-    USDT: "0x6BFa5db24866541c8703f84eF36cC202bcd43322",
-    arUSD: "0xF01d1b172b008d052C3dbA3A57c21FFd705d49a7",
-    pairUSDTarUSD: "0x1bce2604574f6b0c5a9e504c51e1eec458274d5d",
-    arableCollateral: "0xdfAc6d1e26507815a454eAab43779A19214A6c72",
-    arableLiquidation: "0x95d6471b2435252873A5dD39cC693b2c692B3b09",
-    pangolinRouter: "0x2d99abd9008dc933ff5c0cd271b88309593ab921",
+    arableCollateral: '0x3072189C96ce6De73730499bDC91fa7Cb376C774',
+    arableLiquidation: '0x32bb77cDB588C0e55324DF3bC09ea70013c9E482',
+    arUSD: '0x5DaF787B6f5839956D1a50d3B9d0d7DF3FEb3328',
+    USDT: '0x6BFa5db24866541c8703f84eF36cC202bcd43322',
+    pairUSDTarUSD: '0x1bce2604574f6b0c5a9e504c51e1eec458274d5d', // TODO: reset
+    pangolinRouter: '0x2d99abd9008dc933ff5c0cd271b88309593ab921', // TODO: reset if required
   },
   43114: {
     // mainnet
-    USDT: "",
-    arUSD: "",
-    pairUSDTarUSD: "",
-    arableCollateral: "",
-    arableLiquidation: "",
-    pangolinRouter: "0xe54ca86531e17ef3616d22ca28b0d458b6c89106",
+    arableCollateral: '',
+    arableLiquidation: '',
+    arUSD: '',
+    USDT: '',
+    pairUSDTarUSD: '',
+    pangolinRouter: '0xe54ca86531e17ef3616d22ca28b0d458b6c89106',
   },
 };
 

@@ -1,6 +1,6 @@
 const { parseEther } = require('ethers/lib/utils');
 const { setup } = require('../../config/network');
-const { oracle_abi } = require('../abis/oracle_abi');
+const oracle_abi = require('../abis/oracle_abi');
 const { getAddresses } = require('../../config/address');
 
 const web3 = setup();

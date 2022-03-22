@@ -162,16 +162,16 @@ function collectUnhealthyAccounts(users, globalInfos) {
       }
     }
 
-    let userLiquidationRate = BigNumber.from(0);
+    let userRiskRate = BigNumber.from(0);
     if (maxDebt.gt(0)) {
-      userLiquidationRate = currDebt.mul(parseEther('1')).div(maxDebt);
+      userRiskRate = currDebt.mul(parseEther('1')).div(maxDebt);
     } else if (currDebt.gt(0)) {
-      userLiquidationRate = parseEther('100'); // 10000%
+      userRiskRate = parseEther('100'); // 10000%
     }
 
     console.log(
-      'userLiquidationRate',
-      formatBigNumber(userLiquidationRate, 18, 2),
+      'userRiskRate',
+      formatBigNumber(userRiskRate, 18, 2),
       user.address,
       formatBigNumber(currDebt, 18, 2),
       formatBigNumber(maxDebt, 18, 2)
@@ -185,11 +185,11 @@ function collectUnhealthyAccounts(users, globalInfos) {
       formatBigNumber(immediateLiquidationRate, 18, 2)
     );
 
-    if (userLiquidationRate.lt(liquidationRate)) {
+    if (userRiskRate.lt(liquidationRate)) {
       return;
     }
 
-    if (userLiquidationRate.gte(immediateLiquidationRate)) {
+    if (userRiskRate.gte(immediateLiquidationRate)) {
       liquidatableAccounts.push(user);
     } else {
       // TODO: should update this to use on-chain information
