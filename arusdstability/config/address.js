@@ -3,11 +3,12 @@ const chainId = Number(process.env.CHAIN_ID || '43113');
 const contracts = {
   43113: {
     // testnet
-    arableCollateral: '0x3072189C96ce6De73730499bDC91fa7Cb376C774',
-    arableLiquidation: '0x32bb77cDB588C0e55324DF3bC09ea70013c9E482',
-    arUSD: '0x5DaF787B6f5839956D1a50d3B9d0d7DF3FEb3328',
+    arableCollateral: '0x6b6E63b76B0A1a1289F27721aDC5fa6B28F3e99b',
+    arableLiquidation: '0x08668C65f7a1Fa40a170bA17276F2DD08c94aaBF',
+    arUSD: '0x57C5c0a1ccAC1A28f9B165d0DdF42feaa0796C25',
     USDT: '0x6BFa5db24866541c8703f84eF36cC202bcd43322',
-    pairUSDTarUSD: '0x5e2602ab615d38a8ce38ac56705eea2749fbc40c',
+    pairWAVAXarUSD: '0x1434f3a9724cdc60781d1f5bcc69a8e5316ad999',
+    pairUSDTarUSD: '0xfc2648426608965b5b6f21784200af8cb016cf70',
     pangolinRouter: '0x2d99abd9008dc933ff5c0cd271b88309593ab921',
   },
   43114: {
@@ -16,6 +17,7 @@ const contracts = {
     arableLiquidation: '',
     arUSD: '',
     USDT: '',
+    pairWAVAXarUSD: '',
     pairUSDTarUSD: '',
     pangolinRouter: '0xe54ca86531e17ef3616d22ca28b0d458b6c89106',
   },

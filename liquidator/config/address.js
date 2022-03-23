@@ -3,9 +3,9 @@ const chainId = Number(process.env.CHAIN_ID || '43113');
 const contracts = {
   43113: {
     // testnet
-    arableCollateral: '0x3072189C96ce6De73730499bDC91fa7Cb376C774',
-    arableLiquidation: '0x32bb77cDB588C0e55324DF3bC09ea70013c9E482',
-    arUSD: '0x5DaF787B6f5839956D1a50d3B9d0d7DF3FEb3328',
+    arableCollateral: '0x6b6E63b76B0A1a1289F27721aDC5fa6B28F3e99b',
+    arableLiquidation: '0x08668C65f7a1Fa40a170bA17276F2DD08c94aaBF',
+    arUSD: '0x57C5c0a1ccAC1A28f9B165d0DdF42feaa0796C25',
     decimals: {
       '0xd00ae08403b9bbb9124bb305c09058e32c39a48c': 18, // wavax
       '0x23542139268078d36b75fAB7b3e3DEb50f038b3D': 18, // acre
