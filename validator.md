@@ -106,11 +106,12 @@ cd mvp
 On oracle, it is needed to fetch on-chain data from mainnet of other networks and need to configure RPC urls.
 Please ensure to set `PRIVATE_KEY` with the address that is allowed to feed the oracle.
 Please use a unique address per script.
-
+```
 git clone https://github.com/ArableProtocol/arablevalidator oracle
 cd oracle
 npm install
 nano .env
+```
 
 ```
 ETH_RPC="https://mainnet.infura.io/v3/..."
@@ -119,22 +120,24 @@ PRIVATE_KEY="" # Configure private key for the script
 VALIDATOR_ADDRESS=""
 CHAIN_ID=43113
 ```
-
+```
 pm2 start oracle -- run oracle --
 pm2 logs oracle
 pm2 restart oracle
 pm2 stop oracle
+```
 
 #### Liquidator script
 
 Liquidation script periodically (per 60s) fetch unhealthy accounts and liquidate.
 Please ensure to set `PRIVATE_KEY` with the address that holds arUSD - and if does not hold it, script won't run.
 Please use a unique address per script. It shouldn't be same as tokenvesting, oracle, or arUSD stability script `PRIVATE_KEY`.
-
+```
 git clone https://github.com/ArableProtocol/arablevalidator liquidator
 cd liquidator
 npm install
 nano .env
+```
 
 ```
 PRIVATE_KEY="" # Configure private key for the script
@@ -153,22 +156,24 @@ pm2 stop liquidator
 Please ensure to set `PRIVATE_KEY` with the address that holds arUSD and USDT - and if does not hold those tokens, script won't run.
 Please use a unique address per script. It shouldn't be same as tokenvesting, oracle, or arUSD stability script `PRIVATE_KEY`.
 
+```
 git clone https://github.com/ArableProtocol/arablevalidator arusdstability
 cd arusdstability
 npm install
 nano .env
+```
 
 ```
 PRIVATE_KEY="" # Configure private key for the script
 VALIDATOR_ADDRESS=""
 CHAIN_ID=43113
 ```
-
+```
 pm2 start arusdstability -- run arusdstability --
 pm2 logs arusdstability
 pm2 restart arusdstability
 pm2 stop arusdstability
-
+```
 # Notes:
 
 - The validator script performs transactions on the Avalanche network. Make sure to keep an AVAX balance in your account to cover transaction costs.
