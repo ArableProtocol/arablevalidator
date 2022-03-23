@@ -83,11 +83,20 @@ async function runPriceStabilizer() {
   let reserves = await getReserveCall.call();
 
   console.log('----- step2 -----', reserves);
-  const reserve0 = Number(utils.formatUnits(reserves[0], 6));
-  const reserve1 = Number(utils.formatUnits(reserves[1], 18));
+
+  let arUSDReserve;
+  let USDTReserve;
+  if (arUSD.toLowerCase() < USDT.toLowerCase()) {
+    arUSDReserve = Number(utils.formatUnits(reserves[0], 18));
+    USDTReserve = Number(utils.formatUnits(reserves[1], 6));
+  } else {
+    USDTReserve = Number(utils.formatUnits(reserves[0], 6));
+    arUSDReserve = Number(utils.formatUnits(reserves[1], 18));
+  }
 
   console.log('----- step3 -----');
-  const priceOfArUSD = reserve0 / reserve1;
+  let priceOfArUSD = USDTReserve / arUSDReserve;
+  const amountToPut = '1000';
 
   console.log('arUSD price', priceOfArUSD);
 
@@ -95,12 +104,12 @@ async function runPriceStabilizer() {
   // bytes: data.length is greater than 0, the contract transfers the tokens and then calls the following function on the to address:
   console.log('checking..');
   if (priceOfArUSD <= 0.98) {
-    // buy 10000 arUSD
-    const amount0Out = parseUnits('1000', 6);
+    // buy 1000 arUSD
     console.log('----- step4 -----');
+    const arUSDOut = parseEther(amountToPut);
 
     const swapTx = routerContract.methods.swapTokensForExactTokens(
-      amount0Out.toString(),
+      arUSDOut.toString(),
       ethers.constants.MaxUint256.toString(),
       [USDT, arUSD],
       myAccount,
@@ -116,13 +125,13 @@ async function runPriceStabilizer() {
 
     console.log('swap finished', swapTxObj);
   } else if (priceOfArUSD >= 1.02) {
-    // sell 10000 arUSD
-    const amount1Out = parseEther('1000');
+    // sell 1000 arUSD
+    const usdtOut = parseUnits(amountToPut, 6);
 
     console.log('----- step6 -----');
 
     const swapTx = routerContract.methods.swapExactTokensForTokens(
-      amount1Out.toString(),
+      usdtOut.toString(),
       0,
       [arUSD, USDT],
       myAccount,
