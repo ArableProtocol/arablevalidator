@@ -118,12 +118,18 @@ async function collect_osmosis(coingecko) {
   const osmoStakingRewardsApr = await axios
     .get('https://api-osmosis.imperator.co/apr/v2/staking')
     .then((res) => res.data / 100);
+  // const osmoStakingRewardsApr = 0.6539;
   // console.log('osmoStakingRewardsApr', osmoStakingRewardsApr);
 
   // get LP reward APR from api
-  const rewardApr14days = await axios
-    .get(`https://api-osmosis.imperator.co/apr/v1/${poolId}`)
+  let rewardApr14days = await axios
+    .get(`https://api-osmosis.imperator.co/apr/v2/${poolId}`)
     .then((res) => res.data[0].apr_list[0].apr_14d / 100);
+  // rewardApr14days = 0.5556
+
+  // apply superfluid staking APR
+  rewardApr14days += 0.16;
+
   const rewardRate14days = computeRewardRateFromAPR(rewardApr14days);
   // console.log('rewardRate14days', rewardRate14days);
   // console.log('rewardApr14days', rewardApr14days);
