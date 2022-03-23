@@ -14,7 +14,7 @@ const {
   pairUSDTarUSD,
   pangolinRouter,
 } = require('./config/address.js');
-const { parseEther } = require('ethers/lib/utils');
+const { parseEther, parseUnits } = require('ethers/lib/utils');
 
 const web3 = setup();
 
@@ -96,7 +96,7 @@ async function runPriceStabilizer() {
   console.log('checking..');
   if (priceOfArUSD <= 0.98) {
     // buy 10000 arUSD
-    const amount0Out = parseEther('10000');
+    const amount0Out = parseUnits('1000', 6);
     console.log('----- step4 -----');
 
     const swapTx = routerContract.methods.swapTokensForExactTokens(
@@ -117,7 +117,7 @@ async function runPriceStabilizer() {
     console.log('swap finished', swapTxObj);
   } else if (priceOfArUSD >= 1.02) {
     // sell 10000 arUSD
-    const amount1Out = parseEther('10000');
+    const amount1Out = parseEther('1000');
 
     console.log('----- step6 -----');
 
