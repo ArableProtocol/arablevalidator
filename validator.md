@@ -144,11 +144,12 @@ PRIVATE_KEY="" # Configure private key for the script
 VALIDATOR_ADDRESS=""
 CHAIN_ID=43113
 ```
-
+```
 pm2 start liquidator -- run liquidator --
 pm2 logs liquidator
 pm2 restart liquidator
 pm2 stop liquidator
+```
 
 #### arUSD stability script
 
