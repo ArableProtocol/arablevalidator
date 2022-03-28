@@ -1,7 +1,9 @@
-const { parseEther } = require('ethers/lib/utils');
-const { setup } = require('../config/network');
-const oracle_abi = require('../submitter/abis/oracle_abi');
-const { getAddresses } = require('../config/address');
+const { parseEther } = require("ethers/lib/utils");
+const { setup, getBackendApiUrl } = require("../config/network");
+const oracle_abi = require("../submitter/abis/oracle_abi");
+const { getAddresses } = require("../config/address");
+const axios = require("axios");
+const { Wallet } = require("ethers");
 
 const web3 = setup();
 
@@ -22,6 +24,19 @@ exports.setAllowedProvider = async function (addr) {
     gasLimit: web3.utils.toHex(3000000),
     gasPrice,
   });
-  console.log('Success setAllowedProvider!', addr, txObj.transactionHash);
+  console.log("Success setAllowedProvider!", addr, txObj.transactionHash);
   return txObj.transactionHash;
+};
+
+exports.submitOracleStatus = async function (dstaking) {
+  const backendApiUrl = getBackendApiUrl();
+
+  const signer = new Wallet(process.env.PRIVATE_KEY);
+
+  const signature = await signer.signMessage(dstaking);
+
+  await axios.post(`${backendApiUrl}/oracles`, {
+    dstaking,
+    signature,
+  });
 };

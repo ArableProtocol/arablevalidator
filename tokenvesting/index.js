@@ -6,16 +6,16 @@ const {
   stakingRootDistributeRewards,
   getValidators,
   submitStatus,
-} = require('./utils/index.js');
+} = require("./utils/index.js");
 
-const nodeCron = require('node-cron');
-const { waitSeconds } = require('../utils/wait');
-require('dotenv').config();
+const nodeCron = require("node-cron");
+const { waitSeconds } = require("../utils/wait");
+require("dotenv").config();
 
-const isPrimaryFullNode = process.env.IS_PRIMARY_FULL_NODE === '1';
+const isPrimaryFullNode = process.env.IS_PRIMARY_FULL_NODE === "1";
 
 async function runTokenVesting() {
-  console.log('================ starting token vesting flow ================');
+  console.log("================ starting token vesting flow ================");
 
   if (process.env.VALIDATOR_ADDRESS) {
     await dstakingReleaseFromStakingRoot(process.env.VALIDATOR_ADDRESS);
@@ -23,10 +23,10 @@ async function runTokenVesting() {
     // TODO: If already claimed for the epoch, not claim again to reduce gas price
     // - ArableVesting.release - daily - any user
     const isReleasable = await releaseVesting();
-    console.log('isReleasable', isReleasable);
+    console.log("isReleasable", isReleasable);
 
     if (isReleasable || isPrimaryFullNode) {
-      console.log('====handle release from all====');
+      console.log("====handle release from all====");
       await waitSeconds(10);
       // - RootDistributer.releaseToMemberAll - daily - any user (after release)
       await rootDistributerReleaseAll();
@@ -51,7 +51,7 @@ async function runTokenVesting() {
   //     await waitSeconds(5);
   //   }
   // }
-  console.log('================ finished token vesting flow ================');
+  console.log("================ finished token vesting flow ================");
 }
 
 async function main() {
@@ -59,8 +59,8 @@ async function main() {
   // As of now, this will run at 1st min of 1am everyday
 
   if (process.env.VALIDATOR_ADDRESS) {
-    console.log('==individual validator starts==');
-    nodeCron.schedule('0 2 * * *', async function () {
+    console.log("==individual validator starts==");
+    nodeCron.schedule("0 2 * * *", async function () {
       if (process.env.VALIDATOR_ADDRESS) {
         console.log(
           `==validator vesting at ${new Date().toString()} == validator addr: ${
@@ -71,19 +71,19 @@ async function main() {
       }
     });
 
-    nodeCron.schedule('*/15 * * * *', async function () {
-      console.log('====submit validator active status===');
+    nodeCron.schedule("*/15 * * * *", async function () {
+      console.log("====submit validator active status===");
       await submitStatus(process.env.VALIDATOR_ADDRESS);
     });
   } else {
-    console.log('==main node starts== isPrimaryFullNode:', isPrimaryFullNode);
+    console.log("==main node starts== isPrimaryFullNode:", isPrimaryFullNode);
     if (isPrimaryFullNode) {
-      nodeCron.schedule('0 1 * * *', async function () {
+      nodeCron.schedule("0 1 * * *", async function () {
         console.log(`==validator vesting at ${new Date().toString()} ==`);
         await runTokenVesting();
       });
     } else {
-      nodeCron.schedule('20 1 * * *', async function () {
+      nodeCron.schedule("20 1 * * *", async function () {
         console.log(`==validator vesting at ${new Date().toString()} ==`);
         await runTokenVesting();
       });

@@ -1,25 +1,25 @@
-const axios = require('axios');
-const { Wallet } = require('ethers');
+const axios = require("axios");
+const { Wallet } = require("ethers");
 const {
   setup,
   getBackendApiUrl,
   getEthersProvider,
-} = require('../config/network');
+} = require("../config/network");
 const {
   arable_vesting,
   root_distributer,
   staking,
   staking_root,
   otc,
-} = require('../config/address.js');
-const arable_vesting_abi = require('../abis/arable_vesting_abi.json');
-const root_distributer_abi = require('../abis/root_distributer_abi');
-const staking_abi = require('../abis/staking_abi');
-const dstaking_abi = require('../abis/dstaking_abi');
-const staking_root_abi = require('../abis/staking_root_abi');
-const otc_abi = require('../abis/otc_abi');
+} = require("../config/address.js");
+const arable_vesting_abi = require("../abis/arable_vesting_abi.json");
+const root_distributer_abi = require("../abis/root_distributer_abi");
+const staking_abi = require("../abis/staking_abi");
+const dstaking_abi = require("../abis/dstaking_abi");
+const staking_root_abi = require("../abis/staking_root_abi");
+const otc_abi = require("../abis/otc_abi");
 
-const BigNumber = require('bignumber.js');
+const BigNumber = require("bignumber.js");
 
 const web3 = setup();
 
@@ -54,7 +54,7 @@ const getReleasableAmount = (
     .div(new BigNumber(Math.pow(10, 18)))
     .toFixed(0);
 
-  console.log('==releasableAcre=', releasableEther);
+  console.log("==releasableAcre=", releasableEther);
 
   const isReleasable = releasableEther >= 40000;
 
@@ -74,7 +74,7 @@ exports.releaseVesting = async function () {
     arable_vesting_abi,
     arable_vesting
   );
-  console.log('releaseVesting');
+  console.log("releaseVesting");
   const totalReleased = await arableVesting.methods.totalReleased.call().call();
   const startTime = await arableVesting.methods.startTime.call().call();
   const startAmount = await arableVesting.methods.startAmount.call().call();
@@ -101,10 +101,10 @@ exports.releaseVesting = async function () {
       gasLimit: web3.utils.toHex(300000),
       gasPrice,
     });
-    console.log('Success releaseVesting!', txObj.transactionHash);
+    console.log("Success releaseVesting!", txObj.transactionHash);
     return true;
   } catch (error) {
-    console.error('releaseVesting error:', error);
+    console.error("releaseVesting error:", error);
     return false;
   }
 };
@@ -129,7 +129,7 @@ exports.rootDistributerReleaseAll = async function () {
     gasLimit: web3.utils.toHex(500000),
     gasPrice,
   });
-  console.log('Success rootDistributerReleaseAll!', txObj.transactionHash);
+  console.log("Success rootDistributerReleaseAll!", txObj.transactionHash);
   return txObj.transactionHash;
 };
 
@@ -153,7 +153,7 @@ exports.stakingRootDistributeRewards = async function () {
     gasLimit: web3.utils.toHex(3000000),
     gasPrice,
   });
-  console.log('Success stakingRootDistributeRewards!', txObj.transactionHash);
+  console.log("Success stakingRootDistributeRewards!", txObj.transactionHash);
   return txObj.transactionHash;
 };
 
@@ -174,7 +174,7 @@ exports.dstakingReleaseFromStakingRoot = async function (dstaking) {
     gasLimit: web3.utils.toHex(300000),
     gasPrice,
   });
-  console.log('Success dstakingReleaseFromStakingRoot!', txObj.transactionHash);
+  console.log("Success dstakingReleaseFromStakingRoot!", txObj.transactionHash);
   return txObj.transactionHash;
 };
 
@@ -195,7 +195,7 @@ exports.stakingReleaseFromStakingRoot = async function () {
     gasLimit: web3.utils.toHex(300000),
     gasPrice,
   });
-  console.log('Success stakingReleaseFromStakingRoot!', txObj.transactionHash);
+  console.log("Success stakingReleaseFromStakingRoot!", txObj.transactionHash);
   return txObj.transactionHash;
 };
 
@@ -243,7 +243,7 @@ exports.bulkPermitValidatorCreation = async function (addrs) {
     gasLimit: web3.utils.toHex(3000000),
     gasPrice,
   });
-  console.log('Success bulkPermitValidatorCreation!', txObj.transactionHash);
+  console.log("Success bulkPermitValidatorCreation!", txObj.transactionHash);
   return txObj.transactionHash;
 };
 
@@ -283,14 +283,13 @@ exports.setOTCDeal = async function (
     gasLimit: web3.utils.toHex(3000000),
     gasPrice,
   });
-  console.log('Success setOTCDeal!', txObj.transactionHash);
+  console.log("Success setOTCDeal!", txObj.transactionHash);
   return txObj.transactionHash;
 };
 
 // - submit online status to backend
 exports.submitStatus = async function (dstaking) {
   const backendApiUrl = getBackendApiUrl();
-
   const signer = new Wallet(process.env.PRIVATE_KEY);
 
   const signature = await signer.signMessage(dstaking);
