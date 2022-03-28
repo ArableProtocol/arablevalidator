@@ -11,7 +11,7 @@ const nodeCron = require('node-cron');
 const axios = require('axios');
 const { Wallet } = require('ethers');
 
-exports.submitLiquidationStatus = async function (dstaking) {
+async function submitLiquidationStatus(dstaking) {
   const backendApiUrl = getBackendApiUrl();
 
   const signer = new Wallet(process.env.PRIVATE_KEY);
@@ -22,7 +22,7 @@ exports.submitLiquidationStatus = async function (dstaking) {
     dstaking,
     signature,
   });
-};
+}
 
 async function liquidateUnhealthyAccounts() {
   console.log('fetching unhealthy accounts');
@@ -60,9 +60,13 @@ async function main() {
 
   // liquidate unhealthy accounts per 15 min
   nodeCron.schedule('*/15 * * * *', async function () {
-    await liquidateUnhealthyAccounts();
-    console.log('====submit liquidator status===');
-    await submitLiquidationStatus(process.env.VALIDATOR_ADDRESS);
+    try {
+      await liquidateUnhealthyAccounts();
+      console.log('====submit liquidator status===');
+      await submitLiquidationStatus(process.env.VALIDATOR_ADDRESS);
+    } catch (error) {
+      console.error(error);
+    }
   });
 
   // liquidate unhealthy accounts per min
