@@ -60,11 +60,17 @@ exports.updateRewardRateSums = async function () {
     const addresses = await getAddresses();
     const setRewards = rewardAddresses();
     for (let i = 0; i < setRewards.length; i++) {
-      const reward = setRewards[i];
-      console.log(`setting reward sum for farmId = ${reward.farmId}`);
-      let addrs = reward.rewardTokenSymbols.map((symbol) => addresses[symbol]);
-      await updateRewardRateSum(reward.farmId, addrs.toString());
-      await waitSeconds(3);
+      try {
+        const reward = setRewards[i];
+        console.log(`setting reward sum for farmId = ${reward.farmId}`);
+        let addrs = reward.rewardTokenSymbols.map(
+          (symbol) => addresses[symbol]
+        );
+        await updateRewardRateSum(reward.farmId, addrs.toString());
+        await waitSeconds(3);
+      } catch (error) {
+        console.log(error);
+      }
     }
   } catch (error) {
     console.log(error);
