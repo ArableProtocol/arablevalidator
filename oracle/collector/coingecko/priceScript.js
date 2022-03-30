@@ -13,6 +13,8 @@ let ids = [
   'polkadot',
   'truefi',
   'cosmos',
+  'avalanche-2',
+  'arable-protocol',
 ];
 let url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
 

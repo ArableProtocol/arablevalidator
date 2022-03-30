@@ -29,6 +29,9 @@ const deployment = {
   arUniswapETHUSDT: '',
   arCurveDAIUSDCUSDT: '',
   arSushiswapETHTRU: '',
+  WAVAX: '',
+  ACRE: '',
+  AFT: '',
 };
 
 exports.farming = deployment.farming;
@@ -54,3 +57,6 @@ exports.arRaydiumRAYUSDT = deployment.arRaydiumRAYUSDT;
 exports.arUniswapETHUSDT = deployment.arUniswapETHUSDT;
 exports.arCurveDAIUSDCUSDT = deployment.arCurveDAIUSDCUSDT;
 exports.arSushiswapETHTRU = deployment.arSushiswapETHTRU;
+exports.WAVAX = deployment.WAVAX;
+exports.ACRE = deployment.ACRE;
+exports.AFT = deployment.AFT;

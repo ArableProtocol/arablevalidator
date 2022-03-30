@@ -29,6 +29,9 @@ const deployment = {
   arUniswapETHUSDT: '0x89d97BF3eE1dfE712aC99bb4a12C2B96B74915F3',
   arCurveDAIUSDCUSDT: '0x2F14aEe86E671F4eFF063d76e27bd9C938e9c109',
   arSushiswapETHTRU: '0x43F85438B7ad470E48fF7774be14EA6C06467421',
+  WAVAX: '0xd00ae08403b9bbb9124bb305c09058e32c39a48c',
+  ACRE: '0x23542139268078d36b75fAB7b3e3DEb50f038b3D',
+  AFT: '0x7E309EA562892fCB691B4460D350144020379647',
 };
 
 exports.farming = deployment.farming;
@@ -54,3 +57,6 @@ exports.arRaydiumRAYUSDT = deployment.arRaydiumRAYUSDT;
 exports.arUniswapETHUSDT = deployment.arUniswapETHUSDT;
 exports.arCurveDAIUSDCUSDT = deployment.arCurveDAIUSDCUSDT;
 exports.arSushiswapETHTRU = deployment.arSushiswapETHTRU;
+exports.WAVAX = deployment.WAVAX;
+exports.ACRE = deployment.ACRE;
+exports.AFT = deployment.AFT;

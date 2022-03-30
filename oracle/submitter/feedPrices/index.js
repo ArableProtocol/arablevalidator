@@ -23,6 +23,8 @@ async function feedPrices(state, beaconRewardRate) {
       arUniswapETHUSDT,
       arSushiswapETHTRU,
       arOsmosisATOMOSMO,
+      WAVAX,
+      ACRE,
     } = await getAddresses();
     const bnbPrice = state.coingecko.prices.binancecoin.usd;
     const cakePrice = state.coingecko.prices['pancakeswap-token'].usd;
@@ -36,6 +38,8 @@ async function feedPrices(state, beaconRewardRate) {
     const rayPrice = state.coingecko.prices.raydium.usd;
     const dotPrice = state.coingecko.prices.polkadot.usd;
     const truPrice = state.coingecko.prices.truefi.usd;
+    const wavaxPrice = state.coingecko.prices['avalanche-2'].usd;
+    const acrePrice = state.coingecko.prices['arable-protocol'].usd;
 
     const raydiumRAYSOLPrice =
       beaconRewardRate.syntheticFarms?.raySol?.lpTokenPrice ||
@@ -83,6 +87,8 @@ async function feedPrices(state, beaconRewardRate) {
       arUniswapETHUSDT,
       arSushiswapETHTRU,
       arOsmosisATOMOSMO,
+      WAVAX,
+      ACRE,
     ];
     /**Array of all address's price**/
     let priceArray = [
@@ -105,6 +111,8 @@ async function feedPrices(state, beaconRewardRate) {
       uniswapETHUSDTPrice,
       sushiswapETHTRUPrice,
       atomOsmoLpTokenPrice,
+      wavaxPrice,
+      acrePrice,
     ];
 
     console.log('priceArray', priceArray);
