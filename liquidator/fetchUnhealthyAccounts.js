@@ -2,7 +2,7 @@ var axios = require('axios');
 var { BigNumber } = require('ethers');
 var { parseEther } = require('ethers/lib/utils');
 var { formatBigNumber } = require('../utils/format');
-const { decimals } = require('./config/address.js');
+const { getDecimal } = require('./config/address.js');
 
 exports.fetchUnhealthyAccounts = async function () {
   var round = 0;
@@ -151,7 +151,7 @@ function collectUnhealthyAccounts(users, globalInfos) {
         if (allowedRate.gt(0)) {
           let normalizedAmount = BigNumber.from(userCollateral.amount)
             .mul(parseEther('1'))
-            .div(BigNumber.from(10).pow(decimals[collateralAddress] || 18));
+            .div(BigNumber.from(10).pow(getDecimal(collateralAddress)));
           let collateralValue = normalizedAmount
             .mul(priceMapping[collateralAddress])
             .div(parseEther('1'));
