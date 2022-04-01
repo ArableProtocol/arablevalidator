@@ -64,6 +64,22 @@ For security reasons, change the permission of `.env`to readonly:
 chmod 400 .env
 ```
 
+## Running one-time full node when full node is not executed for the epoch
+
+Run
+
+```
+node tokenvesting/full-node-once.js
+```
+
+with below configuration
+
+```
+VALIDATOR_ADDRESS="YOUR_VALIDATOR"
+CHAIN_ID=43114
+PRIVATE_KEY="ACCOUNT_PRIVATE_KEY_WITH_AVAX_FEE"
+```
+
 ## Running the validator
 
 To run the validator in the background, daemonize the `tokenvesting` script:
@@ -106,6 +122,7 @@ cd mvp
 On oracle, it is needed to fetch on-chain data from mainnet of other networks and need to configure RPC urls.
 Please ensure to set `PRIVATE_KEY` with the address that is allowed to feed the oracle.
 Please use a unique address per script.
+
 ```
 git clone https://github.com/ArableProtocol/arablevalidator oracle
 cd oracle
@@ -120,6 +137,7 @@ PRIVATE_KEY="" # Configure private key for the script
 VALIDATOR_ADDRESS=""
 CHAIN_ID=43113
 ```
+
 ```
 pm2 start oracle -- run oracle --
 pm2 logs oracle
@@ -132,6 +150,7 @@ pm2 stop oracle
 Liquidation script periodically (per 60s) fetch unhealthy accounts and liquidate.
 Please ensure to set `PRIVATE_KEY` with the address that holds arUSD - and if does not hold it, script won't run.
 Please use a unique address per script. It shouldn't be same as tokenvesting, oracle, or arUSD stability script `PRIVATE_KEY`.
+
 ```
 git clone https://github.com/ArableProtocol/arablevalidator liquidator
 cd liquidator
@@ -144,6 +163,7 @@ PRIVATE_KEY="" # Configure private key for the script
 VALIDATOR_ADDRESS=""
 CHAIN_ID=43113
 ```
+
 ```
 pm2 start liquidator -- run liquidator --
 pm2 logs liquidator
@@ -169,12 +189,14 @@ PRIVATE_KEY="" # Configure private key for the script
 VALIDATOR_ADDRESS=""
 CHAIN_ID=43113
 ```
+
 ```
 pm2 start arusdstability -- run arusdstability --
 pm2 logs arusdstability
 pm2 restart arusdstability
 pm2 stop arusdstability
 ```
+
 # Notes:
 
 - The validator script performs transactions on the Avalanche network. Make sure to keep an AVAX balance in your account to cover transaction costs.
