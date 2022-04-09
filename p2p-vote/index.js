@@ -1,0 +1,292 @@
+#!/usr/bin/env node
+
+require('dotenv').config();
+const axios = require("axios");
+const { Wallet } = require("ethers");
+const {
+    setup,
+    getBackendApiUrl,
+    getEthersProvider,
+} = require("../tokenvesting/config/network");
+const web3 = setup();
+
+let EXT = 'dt_share';
+
+let WebTorrent = require('webtorrent');
+let bencode = require('bencode');
+let nacl = require('tweetnacl');
+let ripe = require('ripemd160');
+let debug = require('debug')('dreamtime');
+let onConnectCb;
+let onDisconnectCb;
+// check if a string is probably a 32 byte hex representation
+let seedregex = /\b[0-9A-F]{64}\b/gi;
+const account = web3.eth.accounts.privateKeyToAccount(
+    process.env.PRIVATE_KEY
+);
+
+
+// CLI main function
+
+function main(args) {
+    var name = args.name;
+    var client = make_client(args);
+    console.log('me\t', client.fingerprint);
+    // handle data from peers to stdout
+    listen(client, name, post_to_stdout);
+    // send stdin to peers
+    attach_readline_interface(function (type, data) {
+        if (type === 'line') {
+            send(client, data, post_to_stdout);
+        } else if (type === 'exit') {
+            console.log('exiting');
+        }
+    });
+}
+
+function post_to_stdout() {
+    var args = Array.prototype.slice.call(arguments);
+    args[0] = args[0] + '\t';
+    console.log.apply(console, args);
+}
+
+// client datastructure
+
+function make_client(opts) {
+    var opts = opts || {};
+    var struct = {
+        // peer connections
+        "wires": [],
+        // messages already seen recently
+        "seen": [],
+        "seenptr": 0,
+    };
+    // how many recent messages to detect repeats (ringbuffer)
+    struct.seen.length = 1024;
+    // webtorrent client
+    struct.torrent_client = opts.torrent_client || new WebTorrent();
+    // nacl key pair
+    //struct.keys = opts.keys || nacl.sign.keyPair();
+    // compute my pk and fingerprint
+    //struct.pk = Buffer.from(struct.keys.publicKey);
+    //struct.fingerprint = fingerprint_key(struct.pk);
+    //struct.keys = {'publicKey': account.address, 'secretKey': account.privateKey};
+    struct.keys = nacl.sign.keyPair.fromSeed(Buffer.from(process.env.PRIVATE_KEY, 'hex')); // TODO: make it more sensible (make it based on public address, for example)
+    struct.pk = Buffer.from(account.address);
+    struct.fingerprint = account.address;
+    return struct;
+}
+
+// crypto & utility functions
+
+function fingerprint_key(pk) {
+    return new ripe().update(Buffer.from(pk)).digest('hex');
+}
+
+function make_packet(payload, keys) {
+    var packet = {k: Buffer.from(keys.publicKey), u: Buffer.from(nacl.randomBytes(20)), p: Buffer.from(payload.toString())};
+    packet.s = Buffer.from(nacl.sign.detached(Buffer.from(packet.k + packet.u + packet.p), keys.secretKey));
+    return packet;
+}
+
+function process_received_packet(client, packet, wire) {
+    var verified = nacl.sign.detached.verify(Buffer.from(packet.k + packet.u + packet.p), new Uint8Array(packet.s), new Uint8Array(packet.k));
+    debug('verified:', verified);
+    debug('packet:', packet);
+    if (verified) {
+        var uid = packet.k + packet.u;
+        // check if this is a repeat packet
+        if (client.seen.indexOf(uid) === -1) {
+            client.seen[client.seenptr] = uid;
+            client.seenptr = (client.seenptr + 1) % client.seen.length;
+            client.wires.map(function (w) {
+                if (w !== wire) {
+                    w.extended(EXT, packet);
+                }
+            });
+            return ['vote', fingerprint_key(packet.k), packet['p'].toString()];
+        } else {
+            debug('ignoring repeat packet');
+        }
+    }
+}
+
+function process_received_packet_single(client, packet, wires) {
+    var verified = nacl.sign.detached.verify(Buffer.from(packet.k + packet.u + packet.p), new Uint8Array(packet.s), new Uint8Array(packet.k));
+    debug('verified:', verified);
+    debug('packet:', packet);
+    if (verified) {
+        var uid = packet.k + packet.u;
+        // check if this is a repeat packet
+        if (client.seen.indexOf(uid) === -1) {
+            client.seen[client.seenptr] = uid;
+            client.seenptr = (client.seenptr + 1) % client.seen.length;
+            wires.map(function (w) {
+                w.extended(EXT, packet);
+            });
+            return ['vote', fingerprint_key(packet.k), packet['p'].toString()];
+        } else {
+            debug('ignoring repeat packet');
+        }
+    }
+}
+
+function send(client, message, cb) {
+    if (client.torrent) {
+        var got = process_received_packet(client, make_packet(message, client.keys));
+        if (got) {
+            cb.apply(null, got);
+        }
+    }
+}
+
+function sendSingle(client, message, cb, wires) {
+    if (client.torrent) {
+        var got = process_received_packet_single(client, make_packet(message, client.keys), wires);
+        if (got) {
+            cb.apply(null, got);
+        }
+    }
+}
+
+// interface to bittorrent client
+function attach_bittorrent_extension_protocol(client, wire, addr, cb) {
+    var t = function (wire) {
+        wire.extendedHandshake.pk = client.pk;
+    };
+    t.prototype.name = EXT;
+    t.prototype.onExtendedHandshake = function (handshake) {
+        if (handshake.m && handshake.m[EXT]) {
+            wire.fingerprint = fingerprint_key(handshake.pk);
+            client.wires.push(wire);
+            onConnectCb(wire);
+            cb('peer', wire);
+            debug('wires:', client.wires.length);
+        }
+    };
+    t.prototype.onMessage = function (message) {
+        debug('raw:', message);
+        debug('wire:', wire.fingerprint);
+        if (wire.fingerprint) {
+            var packet = bencode.decode(message);
+            cb('packet', wire, packet);
+        }
+    };
+    return t;
+}
+
+function listen(client, name, cb) {
+    if (client.torrent) {
+        disconnect(client);
+    }
+
+    var content = new Buffer.from('\0');
+    content.name = name;
+
+    client.torrent_client.on('torrent', function (torrent) {
+        cb('hash', torrent.infoHash);
+        client.torrent = torrent;
+    });
+
+    var torrent = client.torrent_client.seed(content, function (torrent) {
+        cb('open');
+    });
+
+    torrent.on('wire', function (wire, addr) {
+        debug('saw wire:', wire.peerId);
+        wire.use(attach_bittorrent_extension_protocol(client, wire, addr, function (type, wire, packet) {
+            if (type === 'packet') {
+                var got = process_received_packet(client, packet, wire);
+                if (got) {
+                    cb.apply(null, got);
+                }
+            } else if (type === 'peer') {
+                cb(type, wire.fingerprint);
+            }
+        }));
+        wire.on('close', function () {
+            wires = client.wires.filter(function (w) {
+                return w !== wire;
+            });
+            if (wire.fingerprint) {
+                cb('left', wire.fingerprint);
+                onDisconnectCb(wire);
+                debug('wires:', client.wires.length);
+            }
+        });
+    });
+}
+
+function disconnect(client) {
+    if (client.torrent) {
+        client.torrent_client.remove(client.torrent);
+        client.torrent = null;
+    }
+}
+
+// manage stdin interface in CLI mode
+function attach_readline_interface(cb) {
+    var readline = require('readline');
+
+    var rl = readline.createInterface({
+        input: process.stdin,
+        terminal: false,
+    });
+
+    rl.on('line', function (line) {
+        cb('line', line);
+    });
+
+    rl.on('close', function () {
+        cb('exit');
+        process.exit(0);
+    });
+}
+
+// node module interface
+function connect(room, opts, cb, onConnect, onDisconnect) {
+    onConnectCb = onConnect;
+    onDisconnectCb = onDisconnect;
+    if (typeof (opts) == 'function') {
+        cb = opts;
+        opts = {};
+    }
+    var c = make_client(opts);
+    listen(c, room, cb);
+    return {
+        "sendSingle": sendSingle,
+        "client": c,
+        "send": function (msg) {
+            send(c, msg, cb);
+        },
+        "disconnect": function () {
+            disconnect(c);
+        },
+    };
+}
+
+// extract nacl keypair from the argument
+function extractKeys(k) {
+    var fromSeed = nacl.sign.keyPair.fromSeed;
+    if (seedregex.exec(k)) {
+        return fromSeed(Buffer.from(k, 'hex'));
+    } else {
+        var fs = require('fs');
+        if (fs.existsSync(k)) {
+            var seed = seedregex.exec(fs.readFileSync(k).toString());
+            if (seed) {
+                return fromSeed(Buffer.from(seed[0], 'hex'));
+            }
+        } else if (k) {
+            console.error('Seed file does not exist:', k);
+        }
+    }
+}
+
+if (typeof (require) != 'undefined' && require.main === module) {
+    let argv = {name: 'ArableValidator', keys: account.address};
+    main(argv);
+} else {
+    // node module defines
+    module.exports = connect;
+}
