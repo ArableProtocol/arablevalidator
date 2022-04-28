@@ -1,7 +1,7 @@
-const { getAddresses } = require('../../config/address');
-const { setBulkPrice } = require('../utils/setBulkPrice');
+const { getAddresses } = require("../../config/address");
+const { setBulkPrice } = require("../utils/setBulkPrice");
 
-async function feedPrices(state, beaconRewardRate) {
+async function collectTokenPriceArray(state, beaconRewardRate) {
   try {
     const {
       arBNB,
@@ -27,19 +27,19 @@ async function feedPrices(state, beaconRewardRate) {
       ACRE,
     } = await getAddresses();
     const bnbPrice = state.coingecko.prices.binancecoin.usd;
-    const cakePrice = state.coingecko.prices['pancakeswap-token'].usd;
+    const cakePrice = state.coingecko.prices["pancakeswap-token"].usd;
     const busdBNBLpPrice = state.bsc.pancakeswap.busdBnb.busdBnbLpTokenPrice;
     const cakeBNBLpPrice = state.bsc.pancakeswap.cakeBnb.cakeBnbLpTokenPrice;
     const sushiPrice = state.coingecko.prices.sushi.usd;
     const solPrice = state.coingecko.prices.solana.usd;
     const osmoPrice = state.coingecko.prices.osmosis.usd;
     const quickPrice = state.coingecko.prices.quick.usd;
-    const crvPrice = state.coingecko.prices['curve-dao-token'].usd;
+    const crvPrice = state.coingecko.prices["curve-dao-token"].usd;
     const rayPrice = state.coingecko.prices.raydium.usd;
     const dotPrice = state.coingecko.prices.polkadot.usd;
     const truPrice = state.coingecko.prices.truefi.usd;
-    const wavaxPrice = state.coingecko.prices['avalanche-2'].usd;
-    const acrePrice = state.coingecko.prices['arable-protocol'].usd;
+    const wavaxPrice = state.coingecko.prices["avalanche-2"].usd;
+    const acrePrice = state.coingecko.prices["arable-protocol"].usd;
 
     const raydiumRAYSOLPrice =
       beaconRewardRate.syntheticFarms?.raySol?.lpTokenPrice ||
@@ -115,12 +115,25 @@ async function feedPrices(state, beaconRewardRate) {
       acrePrice,
     ];
 
-    console.log('priceArray', priceArray);
+    return {
+      tokensArray,
+      priceArray,
+    };
+  } catch (error) {}
+}
 
+async function feedPrices(state, beaconRewardRate) {
+  try {
+    const { tokensArray, priceArray } = await collectTokenPriceArray(
+      state,
+      beaconRewardRate
+    );
+    console.log("priceArray", priceArray);
     await setBulkPrice(tokensArray, priceArray);
   } catch (error) {
     console.log(error);
   }
 }
 
+exports.collectTokenPriceArray = collectTokenPriceArray;
 exports.feedPrices = feedPrices;

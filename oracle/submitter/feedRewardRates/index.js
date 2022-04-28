@@ -1,14 +1,14 @@
-const { waitSeconds } = require('../../../utils/wait');
-const { setRewardRate } = require('../utils/setRewardRate');
-const { setBulkRewardRate } = require('../utils/setBulkRewardRate');
-const { farms } = require('../config');
-const { getAddresses } = require('../../config/address');
+const { waitSeconds } = require("../../../utils/wait");
+const { setRewardRate } = require("../utils/setRewardRate");
+const { setBulkRewardRate } = require("../utils/setBulkRewardRate");
+const { farms } = require("../config");
+const { getAddresses } = require("../../config/address");
 
 function convertToFormalRewardRates(state, beaconRewardRate) {
   return [
     {
       farmId: 0, // OSMO staking
-      rewardTokenSymbols: ['arOSMO'],
+      rewardTokenSymbols: ["arOSMO"],
       rewardRates: [
         beaconRewardRate.syntheticFarms?.osmoStaking?.dailyRewardRate ||
           state.osmosis.osmoStakingDailyRewardRate,
@@ -20,7 +20,7 @@ function convertToFormalRewardRates(state, beaconRewardRate) {
     },
     {
       farmId: 1, // ATOM-OSMO LPing
-      rewardTokenSymbols: ['arOSMO'],
+      rewardTokenSymbols: ["arOSMO"],
       rewardRates: [
         beaconRewardRate.syntheticFarms?.atomOsmo?.dailyRewardRate ||
           state.osmosis.atomOsmoLpTokenDailyRewardRate,
@@ -32,7 +32,7 @@ function convertToFormalRewardRates(state, beaconRewardRate) {
     },
     {
       farmId: 2,
-      rewardTokenSymbols: ['arCAKE'],
+      rewardTokenSymbols: ["arCAKE"],
       rewardRates: [
         beaconRewardRate.syntheticFarms?.cakeBnb?.dailyRewardRate ||
           state.bsc.pancakeswap.cakeBnb.poolDailyRewardRate,
@@ -44,7 +44,7 @@ function convertToFormalRewardRates(state, beaconRewardRate) {
     },
     {
       farmId: 3,
-      rewardTokenSymbols: ['arCAKE'],
+      rewardTokenSymbols: ["arCAKE"],
       rewardRates: [
         beaconRewardRate.syntheticFarms?.busdBnb?.dailyRewardRate ||
           state.bsc.pancakeswap.busdBnb.poolDailyRewardRate,
@@ -56,7 +56,7 @@ function convertToFormalRewardRates(state, beaconRewardRate) {
     },
     {
       farmId: 4,
-      rewardTokenSymbols: ['arQUICK'],
+      rewardTokenSymbols: ["arQUICK"],
       rewardRates: [
         beaconRewardRate.syntheticFarms?.quickEthUsdc?.dailyRewardRate ||
           state.poly.polygonData.ethUsdc.dailyRewardRate,
@@ -68,7 +68,7 @@ function convertToFormalRewardRates(state, beaconRewardRate) {
     },
     {
       farmId: 5,
-      rewardTokenSymbols: ['arQUICK'],
+      rewardTokenSymbols: ["arQUICK"],
       rewardRates: [
         beaconRewardRate.syntheticFarms?.quickEth?.dailyRewardRate ||
           state.poly.polygonData.quickEth.dailyRewardRate,
@@ -80,7 +80,7 @@ function convertToFormalRewardRates(state, beaconRewardRate) {
     },
     {
       farmId: 6,
-      rewardTokenSymbols: ['arRAY'],
+      rewardTokenSymbols: ["arRAY"],
       rewardRates: [
         beaconRewardRate.syntheticFarms?.raySol?.dailyRewardRate ||
           state.solana.raydium?.raySol?.dailyRewardRate,
@@ -92,7 +92,7 @@ function convertToFormalRewardRates(state, beaconRewardRate) {
     },
     {
       farmId: 7,
-      rewardTokenSymbols: ['arRAY'],
+      rewardTokenSymbols: ["arRAY"],
       rewardRates: [
         beaconRewardRate.syntheticFarms?.rayUsdt?.dailyRewardRate ||
           state.solana.raydium?.rayUsdt?.dailyRewardRate,
@@ -104,7 +104,7 @@ function convertToFormalRewardRates(state, beaconRewardRate) {
     },
     {
       farmId: 9,
-      rewardTokenSymbols: ['arCRV'],
+      rewardTokenSymbols: ["arCRV"],
       rewardRates: [
         beaconRewardRate.syntheticFarms?.curveThreePool?.dailyRewardRate ||
           state.eth.curve.threePool.dailyRewardRate,
@@ -116,7 +116,7 @@ function convertToFormalRewardRates(state, beaconRewardRate) {
     },
     {
       farmId: 10,
-      rewardTokenSymbols: ['arSUSHI', 'arTRU'],
+      rewardTokenSymbols: ["arSUSHI", "arTRU"],
       rewardRates: [
         beaconRewardRate.syntheticFarms?.ethTru?.sushiDailyRewardRate ||
           state.eth.sushiswap.ethTru.sushiDailyRewardRate,
@@ -132,7 +132,7 @@ function convertToFormalRewardRates(state, beaconRewardRate) {
     },
     {
       farmId: 11,
-      rewardTokenSymbols: ['arUSD'],
+      rewardTokenSymbols: ["arUSD"],
       rewardRates: [
         beaconRewardRate.syntheticFarms?.usdtAave?.dailyRewardRate ||
           state.eth.aave.usdtAave.dailyRewardRate,
@@ -149,7 +149,7 @@ async function feedRewardRates(state, beaconRewardRate) {
   try {
     const addresses = await getAddresses();
     const farmRewardRates = convertToFormalRewardRates(state, beaconRewardRate);
-    console.log('farmRewardRates', farmRewardRates);
+    console.log("farmRewardRates", farmRewardRates);
 
     for (let i = 0; i < farmRewardRates.length; i++) {
       const farm = farmRewardRates[i];
@@ -165,4 +165,5 @@ async function feedRewardRates(state, beaconRewardRate) {
   }
 }
 
+exports.convertToFormalRewardRates = convertToFormalRewardRates;
 exports.feedRewardRates = feedRewardRates;
