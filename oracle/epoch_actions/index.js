@@ -8,7 +8,3 @@ exports.executeEpoch = async function () {
 exports.startNewMinterEpoch = async function () {
   await startNewEpoch();
 };
-
-exports.increaseMinterRewards = async function () {
-  await increaseMinterRewards();
-};
