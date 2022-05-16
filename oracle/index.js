@@ -50,12 +50,6 @@ async function minterRewards() {
   await nodeCron.schedule("1 * * * *", async function () {
     await startNewMinterEpoch();
   });
-
-  // On testnet we run the epoch action once per 8 hours - run every 2nd hour of 8 hours
-  // TODO: configure
-  await nodeCron.schedule("1 * * * *", async function () {
-    await increaseMinterRewards();
-  });
 }
 
 main();
