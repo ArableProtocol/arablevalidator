@@ -1,16 +1,17 @@
-const { ethers, BigNumber } = require('ethers');
+const { ethers, BigNumber } = require("ethers");
 const {
   setup,
   getBackendApiUrl,
   getEthersProvider,
-} = require('./config/network');
-var { parseEther } = require('ethers/lib/utils');
+} = require("./config/network");
+var { parseEther } = require("ethers/lib/utils");
 
-const { collateral, liquidation, arUSD } = require('./config/address.js');
+const { collateral, liquidation, arUSD } = require("./config/address.js");
 
-const collateral_abi = require('./abis/arable_collateral_abi');
-const liquidation_abi = require('./abis/arable_liquidation_abi');
-const synth_abi = require('./abis/arable_synth_abi');
+const collateral_abi = require("./abis/arable_collateral_abi");
+const liquidation_abi = require("./abis/arable_liquidation_abi");
+const synth_abi = require("./abis/arable_synth_abi");
+const { calculateGasLimit } = require("../utils/gas");
 
 const web3 = setup();
 
@@ -25,7 +26,7 @@ exports.approveArUSDForLiquidation = async () => {
   const myAccount = account.address;
   const gasPrice = await web3.eth.getGasPrice();
 
-  console.log('initiate the contracts with abi and contract address');
+  console.log("initiate the contracts with abi and contract address");
   // initiate the contracts with abi and contract address
   const arUSDContract = new web3.eth.Contract(synth_abi, arUSD);
 
@@ -35,12 +36,12 @@ exports.approveArUSDForLiquidation = async () => {
   );
   let allowance = await allowanceCall.call();
 
-  if (BigNumber.from(allowance).gte(parseEther('10000000'))) {
-    console.log('already allowed and skipping');
+  if (BigNumber.from(allowance).gte(parseEther("10000000"))) {
+    console.log("already allowed and skipping");
     return;
   }
 
-  console.log('approving arUSD to be used for liquidation');
+  console.log("approving arUSD to be used for liquidation");
   // approve holding arUSD to be used for liquidation
   const approveTx = arUSDContract.methods.approve(
     liquidation,
@@ -53,7 +54,7 @@ exports.approveArUSDForLiquidation = async () => {
     gasPrice,
   });
 
-  console.log('approval finished', approveTxObj);
+  console.log("approval finished", approveTxObj);
 };
 
 exports.liquidate = async (unhealthyAccount, liquidationAmount) => {
@@ -67,7 +68,7 @@ exports.liquidate = async (unhealthyAccount, liquidationAmount) => {
   const myAccount = account.address;
   const gasPrice = await web3.eth.getGasPrice();
 
-  console.log('initiate the contracts with abi and contract address');
+  console.log("initiate the contracts with abi and contract address");
   // initiate the contracts with abi and contract address
   const liquidationContract = new web3.eth.Contract(
     liquidation_abi,
@@ -87,15 +88,27 @@ exports.liquidate = async (unhealthyAccount, liquidationAmount) => {
     const liquidationTx = liquidationContract.methods.liquidate(
       unhealthyAccount.address
     );
-    const liquidationTxObj = await liquidationTx.send({
-      from: myAccount,
-      gasLimit: 300000,
-      gasPrice,
-    });
+    let estimatedGas = BigNumber.from(0);
+    try {
+      estimatedGas = await liquidationTx.estimateGas({
+        from: myAccount,
+        gasLimit: 300000,
+        gasPrice,
+      });
+    } catch (error) {
+      console.log("gas estimation error");
+    }
+    if (!estimatedGas.isZero()) {
+      const liquidationTxObj = await liquidationTx.send({
+        from: myAccount,
+        gasLimit: calculateGasLimit(estimatedGas),
+        gasPrice,
+      });
 
-    // TODO: for now, this account should have enough arUSD manually deposited by human
-    // TODO: implement the mechanism to convert liquidated funds into arUSD or into USDT - the point when to do it - do it instantly?
-    console.log('liquidation finished', liquidationTxObj);
+      // TODO: for now, this account should have enough arUSD manually deposited by human
+      // TODO: implement the mechanism to convert liquidated funds into arUSD or into USDT - the point when to do it - do it instantly?
+      console.log("liquidation finished", liquidationTxObj);
+    }
   } catch (error) {
     console.error(error);
   }
@@ -127,5 +140,5 @@ exports.flagAccount = async (unhealthyAccount) => {
     gasPrice,
   });
 
-  console.log('flagging operation finished', txObj);
+  console.log("flagging operation finished", txObj);
 };
