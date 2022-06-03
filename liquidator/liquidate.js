@@ -96,7 +96,7 @@ exports.liquidate = async (unhealthyAccount, liquidationAmount) => {
         gasPrice,
       });
     } catch (error) {
-      console.log("gas estimation error");
+      console.log("gas estimation error", error);
     }
     if (!estimatedGas.isZero()) {
       const liquidationTxObj = await liquidationTx.send({
