@@ -1,6 +1,11 @@
 const { collect } = require("./collector");
 const { feed } = require("./submitter");
-const { executeEpoch } = require("./epoch_actions");
+const {
+  executeEpoch,
+  startNewMinterEpoch,
+  increaseMinterRewards,
+} = require("./epoch_actions");
+
 const nodeCron = require("node-cron");
 const { submitOracleStatus } = require("./utils");
 // const { state } = require('./state');
@@ -37,6 +42,14 @@ async function runEpochActions() {
   // await nodeCron.schedule('1 1 * * *', async function () {
   //   await executeEpoch();
   // });
+}
+
+async function minterRewards() {
+  // On testnet we run the epoch action once per 8 hours - run every 1st hour of 8 hours
+  // TODO: configure
+  await nodeCron.schedule("1 * * * *", async function () {
+    await startNewMinterEpoch();
+  });
 }
 
 main();
