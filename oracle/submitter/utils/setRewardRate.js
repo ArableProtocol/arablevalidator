@@ -1,10 +1,10 @@
-const { parseEther } = require('ethers/lib/utils');
-const { setup } = require('../../config/network');
-const oracle_abi = require('../abis/oracle_abi');
-const { getAddresses } = require('../../config/address');
+const { parseEther } = require("ethers/lib/utils");
+const { setup } = require("../../config/network");
+const oracle_abi = require("../abis/oracle_abi");
+const { getAddresses } = require("../../config/address");
 const web3 = setup();
 
-require('dotenv').config();
+require("dotenv").config();
 
 exports.setRewardRate = async function (farmId, rewardToken, dailyRewardRate) {
   const { oracle } = await getAddresses();
@@ -24,11 +24,24 @@ exports.setRewardRate = async function (farmId, rewardToken, dailyRewardRate) {
     rewardToken,
     dailyRewardRate
   );
-  const txObj = await setFarmReward.send({
-    from: myAccount,
-    gasLimit: web3.utils.toHex(500000),
-    gasPrice,
-  });
-  console.log('Success!', txObj.transactionHash);
-  return txObj.transactionHash;
+  let estimatedGas = BigNumber.from(0);
+  try {
+    estimatedGas = await setFarmReward.estimateGas({
+      from: myAccount,
+      gasLimit: 500000,
+      gasPrice,
+    });
+  } catch (error) {
+    console.log("gas estimation error", error);
+  }
+  if (!estimatedGas.isZero()) {
+    const txObj = await setFarmReward.send({
+      from: myAccount,
+      gasLimit: 500000,
+      gasPrice,
+    });
+    console.log("Success!", txObj.transactionHash);
+    return txObj.transactionHash;
+  }
+  return null;
 };

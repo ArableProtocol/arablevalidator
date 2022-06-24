@@ -1,11 +1,11 @@
-const { parseEther } = require('ethers/lib/utils');
-const { setup } = require('../../config/network');
-const oracle_abi = require('../abis/oracle_abi');
-const { getAddresses } = require('../../config/address');
+const { parseEther } = require("ethers/lib/utils");
+const { setup } = require("../../config/network");
+const oracle_abi = require("../abis/oracle_abi");
+const { getAddresses } = require("../../config/address");
 
 const web3 = setup();
 
-require('dotenv').config();
+require("dotenv").config();
 
 exports.setBulkRewardRate = async function (
   farmId,
@@ -25,17 +25,32 @@ exports.setBulkRewardRate = async function (
   dailyRewardRates = dailyRewardRates.map((rate) =>
     parseEther(parseFloat(rate).toFixed(15))
   );
-  console.log('bulkRegisterRewardRate', farmId, rewardTokens, dailyRewardRates);
+  console.log("bulkRegisterRewardRate", farmId, rewardTokens, dailyRewardRates);
   const setFarmReward = oracleContract.methods.bulkRegisterRewardRate(
     farmId,
     rewardTokens,
     dailyRewardRates
   );
-  const txObj = await setFarmReward.send({
-    from: myAccount,
-    gasLimit: 500000,
-    gasPrice,
-  });
-  console.log('Success!', txObj.transactionHash);
-  return txObj.transactionHash;
+
+  let estimatedGas = BigNumber.from(0);
+  try {
+    estimatedGas = await setFarmReward.estimateGas({
+      from: myAccount,
+      gasLimit: 500000,
+      gasPrice,
+    });
+  } catch (error) {
+    console.log("gas estimation error", error);
+  }
+
+  if (!estimatedGas.isZero()) {
+    const txObj = await setFarmReward.send({
+      from: myAccount,
+      gasLimit: 500000,
+      gasPrice,
+    });
+    console.log("Success!", txObj.transactionHash);
+    return txObj.transactionHash;
+  }
+  return null;
 };

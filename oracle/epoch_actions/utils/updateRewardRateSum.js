@@ -1,8 +1,8 @@
-const { setup } = require('../../config/network');
-const { getAddresses } = require('../../config/address');
-const { farm_abi } = require('../abi/farm_abi');
+const { setup } = require("../../config/network");
+const { getAddresses } = require("../../config/address");
+const { farm_abi } = require("../abi/farm_abi");
 const web3 = setup();
-require('dotenv').config();
+require("dotenv").config();
 
 exports.updateRewardRateSum = async function (farmId, rewardToken) {
   const { farming } = await getAddresses();
@@ -18,11 +18,26 @@ exports.updateRewardRateSum = async function (farmId, rewardToken) {
     farmId,
     rewardToken
   );
-  const txObj = await setFarmReward.send({
-    from: myAccount,
-    gasLimit: 1000000,
-    gasPrice,
-  });
-  console.log('Success!', txObj.transactionHash);
-  return txObj.transactionHash;
+
+  let estimatedGas = BigNumber.from(0);
+  try {
+    estimatedGas = await setFarmReward.estimateGas({
+      from: myAccount,
+      gasLimit: 1000000,
+      gasPrice,
+    });
+  } catch (error) {
+    console.log("gas estimation error", error);
+  }
+
+  if (!estimatedGas.isZero()) {
+    const txObj = await setFarmReward.send({
+      from: myAccount,
+      gasLimit: 1000000,
+      gasPrice,
+    });
+    console.log("Success!", txObj.transactionHash);
+    return txObj.transactionHash;
+  }
+  return null;
 };
