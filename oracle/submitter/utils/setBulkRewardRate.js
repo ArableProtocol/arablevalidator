@@ -1,3 +1,4 @@
+const { ethers, BigNumber } = require("ethers");
 const { parseEther } = require("ethers/lib/utils");
 const { setup } = require("../../config/network");
 const oracle_abi = require("../abis/oracle_abi");

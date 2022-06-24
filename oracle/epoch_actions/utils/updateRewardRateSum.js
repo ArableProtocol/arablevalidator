@@ -1,3 +1,4 @@
+const { ethers, BigNumber } = require("ethers");
 const { setup } = require("../../config/network");
 const { getAddresses } = require("../../config/address");
 const { farm_abi } = require("../abi/farm_abi");
