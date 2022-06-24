@@ -88,7 +88,7 @@ exports.liquidate = async (unhealthyAccount, liquidationAmount) => {
     const liquidationTx = liquidationContract.methods.liquidate(
       unhealthyAccount.address
     );
-    let estimatedGas = BigNumber.from(0);
+    let estimatedGas = 0;
     try {
       estimatedGas = await liquidationTx.estimateGas({
         from: myAccount,
@@ -98,10 +98,10 @@ exports.liquidate = async (unhealthyAccount, liquidationAmount) => {
     } catch (error) {
       console.log("gas estimation error", error);
     }
-    if (!estimatedGas.isZero()) {
+    if (estimatedGas !== 0) {
       const liquidationTxObj = await liquidationTx.send({
         from: myAccount,
-        gasLimit: calculateGasLimit(estimatedGas),
+        gasLimit: 300000,
         gasPrice,
       });
 

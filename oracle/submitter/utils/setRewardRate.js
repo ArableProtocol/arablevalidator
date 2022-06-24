@@ -25,7 +25,7 @@ exports.setRewardRate = async function (farmId, rewardToken, dailyRewardRate) {
     rewardToken,
     dailyRewardRate
   );
-  let estimatedGas = BigNumber.from(0);
+  let estimatedGas = 0;
   try {
     estimatedGas = await setFarmReward.estimateGas({
       from: myAccount,
@@ -35,7 +35,7 @@ exports.setRewardRate = async function (farmId, rewardToken, dailyRewardRate) {
   } catch (error) {
     console.log("gas estimation error", error);
   }
-  if (!estimatedGas.isZero()) {
+  if (!estimatedGas !== 0) {
     const txObj = await setFarmReward.send({
       from: myAccount,
       gasLimit: 500000,
