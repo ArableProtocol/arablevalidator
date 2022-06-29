@@ -2,11 +2,15 @@ const { waitSeconds } = require("../../../utils/wait");
 const { fee_collector_abi } = require("../abi/fee_collector_abi");
 var axios = require("axios");
 const { BigNumber } = require("ethers");
+const { getAddresses } = require("../../config/address");
+const { setup } = require("../../config/network");
+
+const web3 = setup();
 
 exports.startNewMinterEpoch = async function () {
   try {
     // TODO: implement!
-    const { feeCollector } = await getAddresses();
+    const { feeCollector } = getAddresses();
     const account = web3.eth.accounts.privateKeyToAccount(
       process.env.PRIVATE_KEY
     );
@@ -17,7 +21,6 @@ exports.startNewMinterEpoch = async function () {
       fee_collector_abi,
       feeCollector
     );
-
     const startNewEpoch = feeCollectorContract.methods.startNewEpoch();
     const txObj = await startNewEpoch.send({
       from: myAccount,
@@ -25,11 +28,9 @@ exports.startNewMinterEpoch = async function () {
       gasPrice,
     });
     console.log("Success!", txObj.transactionHash);
-    if (txObj.receipt.status == true) {
-      // tx is success
-      await increaseMinterRewards(txObj.receipt.blockNumber);
-    }
-
+    const txReceipt = await web3.eth.getTransaction(txObj.transactionHash);
+    await waitSeconds(30);
+    await increaseMinterRewards(txReceipt.blockNumber);
     return txObj.transactionHash;
     // Execute once per 8 hrs - only by oracle providers
     // function startNewEpoch() public override onlyAllowedProvider
@@ -41,8 +42,9 @@ exports.startNewMinterEpoch = async function () {
 
 const increaseMinterRewards = async function (blockNumber) {
   try {
-    const { ACRE } = await getAddresses();
+    const { ACRE, feeCollector } = await getAddresses();
 
+    console.log(`==increaseMinterRewards at block: ${blockNumber}==`);
     // TODO: implement!
     // run 30 mins after increasing epoch
     // epochDistributableAmount can be fetched on TheGraph
@@ -66,8 +68,8 @@ const increaseMinterRewards = async function (blockNumber) {
       feeCollector
     );
 
-    for (let index = 0; index < rewardTokens.length; index++) {
-      const rewardToken = rewardTokens[index];
+    for (let tIndex = 0; tIndex < rewardTokens.length; tIndex++) {
+      const rewardToken = rewardTokens[tIndex];
       const total = await feeCollectorContract.methods
         .getTotalDistributableRewards(rewardToken)
         .call();
@@ -110,21 +112,48 @@ const fetchMintersInfo = async function (blockNumber) {
 
   let data = { users: [], totalDebtFactor: BigNumber.from(0) };
 
-  while (true) {
-    try {
-      // https://thegraph.com/hosted-service/subgraph/arableprotocol/arable-liquidation-fuji
-      const theGraphURL =
-        "https://api.thegraph.com/subgraphs/name/arableprotocol/arable-liquidation-fuji";
+  try {
+    // https://thegraph.com/hosted-service/subgraph/arableprotocol/arable-liquidation-fuji
+    const theGraphURL =
+      "https://api.thegraph.com/subgraphs/name/arableprotocol/arable-liquidation-fuji";
 
-      const globalInfos = (
-        await axios.post(
-          theGraphURL,
-          {
-            query: `{
-          globalInfos(first: 1, block:{number: ${blockNumber}) {
+    const globalInfos = (
+      await axios.post(
+        theGraphURL,
+        {
+          query: `query {
+          globalInfos(first: 1, block:{number: ${blockNumber}}) {
             totalDebtFactor
           }
         }`,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+    ).data.data;
+
+    // TODO: get both accounts and global queries as well from the query
+    console.log(`fetching unhealthy accounts`);
+
+    data.totalDebtFactor = BigNumber.from(
+      globalInfos.globalInfos[0].totalDebtFactor
+    );
+
+    while (round < maxRound) {
+      const users = (
+        await axios.post(
+          theGraphURL,
+          {
+            query: `query {
+            users(first: 1000, where:{debtFactor_gt:1}, block: {number: ${blockNumber}}) {
+              id
+              address
+    					debtFactor
+            }
+          }`,
           },
           {
             headers: {
@@ -132,52 +161,21 @@ const fetchMintersInfo = async function (blockNumber) {
             },
           }
         )
-      ).data.data;
-
-      // TODO: get both accounts and global queries as well from the query
-      console.log(`fetching unhealthy accounts`);
-      data.totalDebtFactor = BigNumber.from(
-        globalInfos.globalInfos[0].totalDebtFactor
-      );
-
-      while (round < maxRound) {
-        const users = (
-          await axios.post(
-            theGraphURL,
-            {
-              query: `{
-            users(first: 1000, where:{debtFactor_gt:1}, block: {number: ${blockNumber}}) {
-              id
-              address
-    					debtFactor
-            }
-          }`,
-            },
-            {
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }
-          )
-        ).data.data.users;
-
-        users.forEach((user) => {
-          data.users.push({
-            address: user.address,
-            debtFactor: BigNumber.from(user.debtFactor),
-          });
+      ).data.data.users;
+      users.forEach((user) => {
+        data.users.push({
+          address: user.address,
+          debtFactor: BigNumber.from(user.debtFactor),
         });
+      });
 
-        round++;
-      }
-      return {
-        flaggableAccounts: totalFlaggableAccounts,
-        liquidatableAccounts: totalLiquidatableAccounts,
-      };
-    } catch (error) {
-      await waitSeconds(30);
+      round++;
     }
+    return {
+      flaggableAccounts: totalFlaggableAccounts,
+      liquidatableAccounts: totalLiquidatableAccounts,
+    };
+  } catch (error) {
+    return data;
   }
-
-  return data;
 };

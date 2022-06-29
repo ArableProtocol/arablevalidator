@@ -1,10 +1,6 @@
 const { collect } = require("./collector");
 const { feed } = require("./submitter");
-const {
-  executeEpoch,
-  startNewMinterEpoch,
-  increaseMinterRewards,
-} = require("./epoch_actions");
+const { executeEpoch, startNewMinterEpoch } = require("./epoch_actions");
 
 const nodeCron = require("node-cron");
 const { submitOracleStatus } = require("./utils");
@@ -14,6 +10,7 @@ require("dotenv").config();
 async function main() {
   await runDataFeedActions();
   await runEpochActions();
+  await minterRewards();
 
   nodeCron.schedule("*/15 * * * *", async function () {
     console.log("====submit oracle status===");

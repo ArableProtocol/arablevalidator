@@ -35,6 +35,7 @@ const deployment = {
   AFT: "0x7E309EA562892fCB691B4460D350144020379647",
 };
 
+exports.feeCollector = deployment.feeCollector;
 exports.farming = deployment.farming;
 exports.oracle = deployment.oracle;
 exports.arUSD = deployment.arUSD;

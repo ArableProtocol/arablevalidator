@@ -1,16 +1,16 @@
-const { getNetwork } = require('./network');
-const fujiAddresses = require('../config/fujiAddress');
-const avaxAddresses = require('./avaxAddress');
+const { getNetwork } = require("./network");
+const fujiAddresses = require("../config/fujiAddress");
+const avaxAddresses = require("./avaxAddress");
 
-async function getAddresses() {
+function getAddresses() {
   const network = getNetwork();
   switch (network) {
-    case 'avax':
+    case "avax":
       return avaxAddresses;
-    case 'fuji':
+    case "fuji":
       return fujiAddresses;
     default:
-      console.log('Not supported network');
+      console.log("Not supported network");
       return null;
   }
 }
