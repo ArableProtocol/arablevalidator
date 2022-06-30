@@ -89,10 +89,11 @@ const increaseMinterRewards = async function (blockNumber) {
         .getTotalDistributableRewards(rewardToken)
         .call();
       let index = 0;
-      const perPage = 20;
+      const perPage = 50;
+      let minters = [];
+      let amounts = [];
+
       while (index < users.length) {
-        let minters = [];
-        let amounts = [];
         minters.push(users[index].address);
         amounts.push(
           BigNumber.from(total)
@@ -112,6 +113,8 @@ const increaseMinterRewards = async function (blockNumber) {
             gasPrice,
           });
           console.log("Success!", txObj.transactionHash);
+          minters = [];
+          amounts = [];
         }
         index++;
       }
