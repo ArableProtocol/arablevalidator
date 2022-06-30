@@ -22,16 +22,31 @@ exports.startNewMinterEpoch = async function () {
       feeCollector
     );
     const startNewEpoch = feeCollectorContract.methods.startNewEpoch();
-    const txObj = await startNewEpoch.send({
-      from: myAccount,
-      gasLimit: 1000000,
-      gasPrice,
-    });
-    console.log("Success!", txObj.transactionHash);
-    const txReceipt = await web3.eth.getTransaction(txObj.transactionHash);
-    await waitSeconds(30);
-    await increaseMinterRewards(txReceipt.blockNumber);
-    return txObj.transactionHash;
+
+    let estimatedGas = 0;
+    try {
+      estimatedGas = await startNewEpoch.estimateGas({
+        from: myAccount,
+        gasLimit: 1000000,
+        gasPrice,
+      });
+    } catch (error) {
+      console.log("gas estimation error", error);
+    }
+
+    if (estimatedGas !== 0) {
+      const txObj = await startNewEpoch.send({
+        from: myAccount,
+        gasLimit: 1000000,
+        gasPrice,
+      });
+      console.log("Success!", txObj.transactionHash);
+      const txReceipt = await web3.eth.getTransaction(txObj.transactionHash);
+      await waitSeconds(30);
+      await increaseMinterRewards(txReceipt.blockNumber);
+      return txObj.transactionHash;
+    }
+
     // Execute once per 8 hrs - only by oracle providers
     // function startNewEpoch() public override onlyAllowedProvider
     // Should check if it's going to reverted and if so should stop
