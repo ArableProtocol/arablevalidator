@@ -40,7 +40,7 @@ exports.startNewMinterEpoch = async function () {
         gasLimit: 1000000,
         gasPrice,
       });
-      console.log("Success!", txObj.transactionHash);
+      console.log("startNewEpoch Success!", txObj.transactionHash);
       const txReceipt = await web3.eth.getTransaction(txObj.transactionHash);
       await waitSeconds(30);
       await increaseMinterRewards(txReceipt.blockNumber);

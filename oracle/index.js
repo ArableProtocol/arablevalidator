@@ -20,7 +20,7 @@ async function main() {
 
 async function runDataFeedActions() {
   // All scripts will run first second of first minute every hour
-  await nodeCron.schedule("1 * * * *", async function () {
+  await nodeCron.schedule("40 * * * *", async function () {
     const state = await collect();
     console.log("collection", JSON.stringify(state, null, "\t"));
     await feed(state);
@@ -30,7 +30,7 @@ async function runDataFeedActions() {
 
 async function runEpochActions() {
   // On testnet we run the epoch action once per hour
-  await nodeCron.schedule("1 * * * *", async function () {
+  await nodeCron.schedule("20 * * * *", async function () {
     await executeEpoch();
   });
 
