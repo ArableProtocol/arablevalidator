@@ -1,4 +1,6 @@
-const deployment = {
+//
+
+module.exports = {
   deployer: "0x2e84741f27e2993D637f3a537191101ccBF67050",
   addressRegistry: "0x0a4c99ae2BE6E95cE02EDa84fFD295f006899F70",
   oracle: "0x01968B52d1542Acc64f8467f90E3146Eaa37319a",
@@ -30,35 +32,13 @@ const deployment = {
   arUniswapETHUSDT: "0x66b6082F092Eef462ECaeCCbA4127C1F2474c8de",
   arCurveDAIUSDCUSDT: "0x88E3b4Eea13032bbd8624780c84BE06124026561",
   arSushiswapETHTRU: "0x334154BC31ad6bacAa1c84f275Fc644535f86198",
+  arBTC: "",
+  arETH: "",
+  arAVAX: "",
+  arMATIC: "",
+  arATOM: "",
+  arEVMOS: "",
   WAVAX: "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
   ACRE: "0x23542139268078d36b75fAB7b3e3DEb50f038b3D",
   AFT: "0x7E309EA562892fCB691B4460D350144020379647",
 };
-
-exports.feeCollector = deployment.feeCollector;
-exports.farming = deployment.farming;
-exports.oracle = deployment.oracle;
-exports.arUSD = deployment.arUSD;
-exports.arBNB = deployment.arBNB;
-exports.arCAKE = deployment.arCAKE;
-exports.arPancakeswapBUSDBNB = deployment.arPancakeswapBUSDBNB;
-exports.arPancakeswapCAKEBNB = deployment.arPancakeswapCAKEBNB;
-exports.arSUSHI = deployment.arSUSHI;
-exports.arSOL = deployment.arSOL;
-exports.arOSMO = deployment.arOSMO;
-exports.arQUICK = deployment.arQUICK;
-exports.arCRV = deployment.arCRV;
-exports.arRAY = deployment.arRAY;
-exports.arDOT = deployment.arDOT;
-exports.arTRU = deployment.arTRU;
-exports.arOsmosisATOMOSMO = deployment.arOsmosisATOMOSMO;
-exports.arQuickswapETHUSDC = deployment.arQuickswapETHUSDC;
-exports.arQuickswapETHQUICK = deployment.arQuickswapETHQUICK;
-exports.arRaydiumRAYSOL = deployment.arRaydiumRAYSOL;
-exports.arRaydiumRAYUSDT = deployment.arRaydiumRAYUSDT;
-exports.arUniswapETHUSDT = deployment.arUniswapETHUSDT;
-exports.arCurveDAIUSDCUSDT = deployment.arCurveDAIUSDCUSDT;
-exports.arSushiswapETHTRU = deployment.arSushiswapETHTRU;
-exports.WAVAX = deployment.WAVAX;
-exports.ACRE = deployment.ACRE;
-exports.AFT = deployment.AFT;

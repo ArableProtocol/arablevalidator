@@ -3,7 +3,10 @@ const { fee_collector_abi } = require("../abi/fee_collector_abi");
 var axios = require("axios");
 const { BigNumber } = require("ethers");
 const { getAddresses } = require("../../config/address");
-const { setup } = require("../../config/network");
+const {
+  setup,
+  getLiquidationSubgraphEndPoint,
+} = require("../../config/network");
 
 const web3 = setup();
 
@@ -131,9 +134,7 @@ const fetchMintersInfo = async function (blockNumber) {
   let data = { users: [], totalDebtFactor: BigNumber.from(0) };
 
   try {
-    // https://thegraph.com/hosted-service/subgraph/arableprotocol/arable-liquidation-fuji
-    const theGraphURL =
-      "https://api.thegraph.com/subgraphs/name/arableprotocol/arable-liquidation-fuji";
+    const theGraphURL = getLiquidationSubgraphEndPoint();
 
     const globalInfos = (
       await axios.post(

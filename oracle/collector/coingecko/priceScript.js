@@ -15,6 +15,10 @@ let ids = [
   'cosmos',
   'avalanche-2',
   'arable-protocol',
+  'evmos',
+  'bitcoin',
+  'ethereum',
+  'matic-network',
 ];
 let url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
 

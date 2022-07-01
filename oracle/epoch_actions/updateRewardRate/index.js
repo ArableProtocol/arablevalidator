@@ -1,58 +1,63 @@
 const { waitSeconds } = require('../../../utils/wait');
 const { updateRewardRateSum } = require('../utils/updateRewardRateSum');
 const { getAddresses } = require('../../config/address');
+const { getNetwork } = require('../../config/network');
 
 function rewardAddresses() {
-  return [
-    {
-      farmId: 0,
-      rewardTokenSymbols: ['arOSMO'],
-    },
-    {
-      farmId: 1,
-      rewardTokenSymbols: ['arOSMO'],
-    },
-    {
-      farmId: 2,
-      rewardTokenSymbols: ['arCAKE'],
-    },
-    {
-      farmId: 3,
-      rewardTokenSymbols: ['arCAKE'],
-    },
-    {
-      farmId: 4,
-      rewardTokenSymbols: ['arQUICK'],
-    },
-    {
-      farmId: 5,
-      rewardTokenSymbols: ['arQUICK'],
-    },
-    {
-      farmId: 6,
-      rewardTokenSymbols: ['arRAY'],
-    },
-    {
-      farmId: 7,
-      rewardTokenSymbols: ['arRAY'],
-    },
-    {
-      farmId: 9,
-      rewardTokenSymbols: ['arCRV'],
-    },
-    {
-      farmId: 10,
-      rewardTokenSymbols: ['arSUSHI'],
-    },
-    {
-      farmId: 10,
-      rewardTokenSymbols: ['arTRU'],
-    },
-    {
-      farmId: 11,
-      rewardTokenSymbols: ['arUSD'],
-    },
-  ];
+  const network = getNetwork();
+  if (network === 'fuji') {
+    return [
+      {
+        farmId: 0,
+        rewardTokenSymbols: ['arOSMO'],
+      },
+      {
+        farmId: 1,
+        rewardTokenSymbols: ['arOSMO'],
+      },
+      {
+        farmId: 2,
+        rewardTokenSymbols: ['arCAKE'],
+      },
+      {
+        farmId: 3,
+        rewardTokenSymbols: ['arCAKE'],
+      },
+      {
+        farmId: 4,
+        rewardTokenSymbols: ['arQUICK'],
+      },
+      {
+        farmId: 5,
+        rewardTokenSymbols: ['arQUICK'],
+      },
+      {
+        farmId: 6,
+        rewardTokenSymbols: ['arRAY'],
+      },
+      {
+        farmId: 7,
+        rewardTokenSymbols: ['arRAY'],
+      },
+      {
+        farmId: 9,
+        rewardTokenSymbols: ['arCRV'],
+      },
+      {
+        farmId: 10,
+        rewardTokenSymbols: ['arSUSHI'],
+      },
+      {
+        farmId: 10,
+        rewardTokenSymbols: ['arTRU'],
+      },
+      {
+        farmId: 11,
+        rewardTokenSymbols: ['arUSD'],
+      },
+    ];
+  }
+  return [];
 }
 
 exports.updateRewardRateSums = async function () {
