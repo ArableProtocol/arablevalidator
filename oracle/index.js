@@ -7,6 +7,8 @@ const { submitOracleStatus } = require("./utils");
 // const { state } = require('./state');
 require("dotenv").config();
 
+const startMinute = Math.floor(Math.random() * 100000) % 60;
+
 async function main() {
   await runDataFeedActions();
   await runEpochActions();
@@ -20,7 +22,8 @@ async function main() {
 
 async function runDataFeedActions() {
   // All scripts will run first second of first minute every hour
-  await nodeCron.schedule("40 * * * *", async function () {
+  const minute = startMinute;
+  await nodeCron.schedule(`${minute} * * * *`, async function () {
     const state = await collect();
     console.log("collection", JSON.stringify(state, null, "\t"));
     await feed(state);
@@ -30,7 +33,8 @@ async function runDataFeedActions() {
 
 async function runEpochActions() {
   // On testnet we run the epoch action once per hour
-  await nodeCron.schedule("20 * * * *", async function () {
+  const minute = (startMinute + 20) % 60;
+  await nodeCron.schedule(`${minute} * * * *`, async function () {
     await executeEpoch();
   });
 
@@ -44,7 +48,9 @@ async function runEpochActions() {
 async function minterRewards() {
   // On testnet we run the epoch action once per 8 hours - run every 1st hour of 8 hours
   // TODO: configure
-  await nodeCron.schedule("1 * * * *", async function () {
+  const minute = (startMinute + 40) % 60;
+
+  await nodeCron.schedule(`${minute} * * * *`, async function () {
     await startNewMinterEpoch();
   });
 }
