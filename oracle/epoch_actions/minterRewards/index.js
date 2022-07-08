@@ -112,7 +112,7 @@ const increaseMinterRewards = async function (blockNumber) {
             );
           const txObj = await bulkIncreaseMinterRewards.send({
             from: myAccount,
-            gasLimit: 1000000,
+            gasLimit: 8000000,
             gasPrice,
           });
           console.log("Success!", txObj.transactionHash);
