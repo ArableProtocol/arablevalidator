@@ -1,14 +1,16 @@
 const { waitSeconds } = require("../../../utils/wait");
 const { fee_collector_abi } = require("../abi/fee_collector_abi");
 var axios = require("axios");
-const { BigNumber } = require("ethers");
+const { BigNumber, Contract } = require("ethers");
 const { getAddresses } = require("../../config/address");
 const {
   setup,
   getLiquidationSubgraphEndPoint,
+  getEthersProvider,
 } = require("../../config/network");
 
 const web3 = setup();
+const ethersProvider = getEthersProvider();
 
 exports.startNewMinterEpoch = async function () {
   try {
@@ -45,8 +47,8 @@ exports.startNewMinterEpoch = async function () {
       });
       console.log("startNewEpoch Success!", txObj.transactionHash);
       const txReceipt = await web3.eth.getTransaction(txObj.transactionHash);
-      await waitSeconds(30);
-      await increaseMinterRewards(txReceipt.blockNumber);
+      // await waitSeconds(30);
+      // await increaseMinterRewards(txReceipt.blockNumber);
       return txObj.transactionHash;
     }
 
@@ -56,6 +58,30 @@ exports.startNewMinterEpoch = async function () {
   } catch (error) {
     console.log(error);
   }
+};
+
+exports.listenNewEpoch = function () {
+  const { feeCollector } = getAddresses();
+
+  const contract = new Contract(
+    feeCollector,
+    fee_collector_abi,
+    ethersProvider
+  );
+
+  console.log("===listen new epoch===");
+
+  contract.on("EpochStart", (epochNumber, epochStartBlock, epochStartTime) => {
+    console.log("====epochStart===", epochStartBlock);
+    const blockNumber = epochStartBlock.toNumber();
+
+    const handle = async () => {
+      await waitSeconds(60);
+      await increaseMinterRewards(blockNumber);
+    };
+
+    handle().then();
+  });
 };
 
 const increaseMinterRewards = async function (blockNumber) {

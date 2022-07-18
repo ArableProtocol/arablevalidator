@@ -1,4 +1,5 @@
 const Web3 = require("web3");
+const { Contract, providers } = require("ethers");
 const { fuji_url, avax_url } = require("../../config/config.rpc");
 
 function getNetwork() {
@@ -8,6 +9,14 @@ function getNetwork() {
   }
   return "fuji";
 }
+
+exports.getEthersProvider = function () {
+  const network = getNetwork();
+  if (network == "avax") {
+    return new providers.JsonRpcProvider(avax_url);
+  }
+  return new providers.JsonRpcProvider(fuji_url);
+};
 
 exports.setup = function () {
   const network = getNetwork();

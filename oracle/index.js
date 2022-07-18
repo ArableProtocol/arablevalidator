@@ -1,6 +1,7 @@
 const { collect } = require("./collector");
 const { feed } = require("./submitter");
 const { executeEpoch, startNewMinterEpoch } = require("./epoch_actions");
+const { listenNewEpoch } = require("./epoch_actions/minterRewards");
 
 const nodeCron = require("node-cron");
 const { submitOracleStatus } = require("./utils");
@@ -53,6 +54,8 @@ async function minterRewards() {
   await nodeCron.schedule(`${minute} * * * *`, async function () {
     await startNewMinterEpoch();
   });
+
+  listenNewEpoch();
 }
 
 main();
