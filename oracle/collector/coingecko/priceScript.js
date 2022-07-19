@@ -89,7 +89,7 @@ let ids = [
   "decentraland",
   "tezos",
   "apecoin",
-  "aragon",
+  "quant-network",
   "dydx",
   "ankr",
   "livepeer",
