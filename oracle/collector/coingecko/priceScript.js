@@ -71,7 +71,7 @@ let ids = [
   "loopring",
   "enjincoin",
   "litecoin",
-  "leo",
+  "leo-token",
   "ftx-token",
   "uniswap",
   "okb",

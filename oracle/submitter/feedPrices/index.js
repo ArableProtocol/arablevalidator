@@ -236,7 +236,7 @@ async function feedPrices(state, beaconRewardRate) {
       [arLRC]: state.coingecko.prices.loopring.usd,
       [arENJ]: state.coingecko.prices.enjincoin.usd,
       [arLTC]: state.coingecko.prices.litecoin.usd,
-      [arLEO]: state.coingecko.prices.leo.usd,
+      [arLEO]: state.coingecko.prices["leo-token"].usd,
       [arFTT]: state.coingecko.prices["ftx-token"].usd,
       [arUNI]: state.coingecko.prices.uniswap.usd,
       [arOKB]: state.coingecko.prices.okb.usd,
