@@ -20,8 +20,8 @@ exports.setBulkPrice = async function (tokenArray, priceArray) {
 
   const itemsPerTx = 30;
 
-  let index;
-  while (true) {
+  let index = 0;
+  while (index < tokenArray.length) {
     const subTokenArray = tokenArray.slice(index, index + itemsPerTx);
     const subPriceArray = priceArray.slice(index, index + itemsPerTx);
     index += itemsPerTx;
@@ -46,10 +46,6 @@ exports.setBulkPrice = async function (tokenArray, priceArray) {
       console.log("Success!", txObj.transactionHash);
 
       return txObj.transactionHash;
-    }
-
-    if (index >= tokenArray.length) {
-      break;
     }
   }
 };
