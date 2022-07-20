@@ -2,6 +2,7 @@ const { parseEther } = require("ethers/lib/utils");
 const { setup } = require("../../config/network");
 const oracle_abi = require("../abis/oracle_abi");
 const { getAddresses } = require("../../config/address");
+const { waitSeconds } = require("../../../utils/wait");
 
 const web3 = setup();
 
@@ -44,6 +45,8 @@ exports.setBulkPrice = async function (tokenArray, priceArray) {
         gasPrice,
       });
       console.log("Success!", txObj.transactionHash);
+
+      await waitSeconds(10);
     }
   }
 };
