@@ -44,8 +44,6 @@ exports.setBulkPrice = async function (tokenArray, priceArray) {
         gasPrice,
       });
       console.log("Success!", txObj.transactionHash);
-
-      return txObj.transactionHash;
     }
   }
 };
