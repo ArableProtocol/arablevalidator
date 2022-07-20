@@ -17,15 +17,35 @@ exports.setBulkPrice = async function (tokenArray, priceArray) {
   priceArray = priceArray.map((price) =>
     parseEther(parseFloat(price).toFixed(15))
   );
-  const setBulkPrice = oracleContract.methods.bulkPriceSet(
-    tokenArray,
-    priceArray
-  );
-  const txObj = await setBulkPrice.send({
-    from: myAccount,
-    gasLimit: 8000000,
-    gasPrice,
-  });
-  console.log("Success!", txObj.transactionHash);
-  return txObj.transactionHash;
+
+  const itemsPerTx = 30;
+
+  let index = 0;
+  while (index < tokenArray.length) {
+    const subTokenArray = tokenArray.slice(index, index + itemsPerTx);
+    const subPriceArray = priceArray.slice(index, index + itemsPerTx);
+    index += itemsPerTx;
+
+    if (subTokenArray.length > 0) {
+      const setBulkPrice = oracleContract.methods.bulkPriceSet(
+        subTokenArray,
+        subPriceArray
+      );
+
+      const estimatedGas = await setBulkPrice.estimateGas({
+        from: myAccount,
+        gasLimit: 8000000,
+        gasPrice,
+      });
+
+      const txObj = await setBulkPrice.send({
+        from: myAccount,
+        gasLimit: estimatedGas * 1.2,
+        gasPrice,
+      });
+      console.log("Success!", txObj.transactionHash);
+
+      return txObj.transactionHash;
+    }
+  }
 };
