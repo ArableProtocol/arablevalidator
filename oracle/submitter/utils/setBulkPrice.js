@@ -40,7 +40,7 @@ exports.setBulkPrice = async function (tokenArray, priceArray) {
 
       const txObj = await setBulkPrice.send({
         from: myAccount,
-        gasLimit: estimatedGas * 1.2,
+        gasLimit: Math.floor(estimatedGas * 1.2),
         gasPrice,
       });
       console.log("Success!", txObj.transactionHash);
