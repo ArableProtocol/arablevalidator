@@ -1,7 +1,7 @@
-const { parseEther } = require('ethers/lib/utils');
-const { setup } = require('../../config/network');
-const oracle_abi = require('../abis/oracle_abi');
-const { getAddresses } = require('../../config/address');
+const { parseEther } = require("ethers/lib/utils");
+const { setup } = require("../../config/network");
+const oracle_abi = require("../abis/oracle_abi");
+const { getAddresses } = require("../../config/address");
 
 const web3 = setup();
 
@@ -23,9 +23,9 @@ exports.setBulkPrice = async function (tokenArray, priceArray) {
   );
   const txObj = await setBulkPrice.send({
     from: myAccount,
-    gasLimit: 3000000,
+    gasLimit: 8000000,
     gasPrice,
   });
-  console.log('Success!', txObj.transactionHash);
+  console.log("Success!", txObj.transactionHash);
   return txObj.transactionHash;
 };
