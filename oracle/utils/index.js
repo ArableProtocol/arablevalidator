@@ -4,6 +4,7 @@ const oracle_abi = require("../submitter/abis/oracle_abi");
 const { getAddresses } = require("../config/address");
 const axios = require("axios");
 const { Wallet } = require("ethers");
+const version = require("../../config/version.json");
 
 const web3 = setup();
 
@@ -38,5 +39,6 @@ exports.submitOracleStatus = async function (dstaking) {
   await axios.post(`${backendApiUrl}/oracles`, {
     dstaking,
     signature,
+    version: version.oracle,
   });
 };

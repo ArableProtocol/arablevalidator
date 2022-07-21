@@ -18,6 +18,7 @@ const staking_abi = require("../abis/staking_abi");
 const dstaking_abi = require("../abis/dstaking_abi");
 const staking_root_abi = require("../abis/staking_root_abi");
 const otc_abi = require("../abis/otc_abi");
+const version = require("../../config/version.json");
 
 const BigNumber = require("bignumber.js");
 
@@ -297,5 +298,6 @@ exports.submitStatus = async function (dstaking) {
   await axios.post(`${backendApiUrl}/validators`, {
     dstaking,
     signature,
+    version: version.validator,
   });
 };

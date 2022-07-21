@@ -6,6 +6,7 @@ const erc20_abi = require("./abis/erc20_abi");
 const nodeCron = require("node-cron");
 const axios = require("axios");
 const { setup, getBackendApiUrl } = require("./config/network");
+const version = require("../config/version.json");
 
 const { waitSeconds } = require("../utils/wait");
 
@@ -165,6 +166,7 @@ async function submitStabilityStatus(dstaking) {
   await axios.post(`${backendApiUrl}/stability`, {
     dstaking,
     signature,
+    version: version.stability,
   });
 }
 
