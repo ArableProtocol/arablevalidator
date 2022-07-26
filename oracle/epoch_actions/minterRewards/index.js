@@ -74,17 +74,18 @@ exports.listenNewEpoch = function () {
   contract.on("EpochStart", (epochNumber, epochStartBlock, epochStartTime) => {
     console.log("====epochStart===", epochStartBlock);
     const blockNumber = epochStartBlock.toNumber();
+    const epochStartTime = epochStartTime.toNumber();
 
     const handle = async () => {
       await waitSeconds(60);
-      await increaseMinterRewards(blockNumber);
+      await increaseMinterRewards(blockNumber, epochStartTime);
     };
 
     handle().then();
   });
 };
 
-const increaseMinterRewards = async function (blockNumber) {
+const increaseMinterRewards = async function (blockNumber, epochStartTime) {
   try {
     const { ACRE, feeCollector } = await getAddresses();
 
@@ -99,7 +100,7 @@ const increaseMinterRewards = async function (blockNumber) {
     // Should check if it's going to reverted and if so should stop
     const rewardTokens = [ACRE];
 
-    const { users, totalDebtFactor } = await fetchMintersInfo(blockNumber);
+    const { users } = await fetchMintersInfo(blockNumber);
 
     const account = web3.eth.accounts.privateKeyToAccount(
       process.env.PRIVATE_KEY
@@ -112,6 +113,17 @@ const increaseMinterRewards = async function (blockNumber) {
       feeCollector
     );
 
+    let totalWeight = BigNumber.from(0);
+    for (let index = 0; index < users.length; index++) {
+      const user = users[index];
+
+      totalWeight = totalWeight.add(
+        user.minterRewardWeight
+          .add(epochStartTime - user.lastDebtFactorSetTime)
+          .sub(user.lastMinterRewardWeight)
+      );
+    }
+
     for (let tIndex = 0; tIndex < rewardTokens.length; tIndex++) {
       const rewardToken = rewardTokens[tIndex];
       const total = await feeCollectorContract.methods
@@ -123,12 +135,12 @@ const increaseMinterRewards = async function (blockNumber) {
       let amounts = [];
 
       while (index < users.length) {
+        const user = users[index];
         minters.push(users[index].address);
-        amounts.push(
-          BigNumber.from(total)
-            .mul(users[index].debtFactor)
-            .div(totalDebtFactor)
-        );
+        const userWeight = user.minterRewardWeight
+          .add(epochStartTime - user.lastDebtFactorSetTime)
+          .sub(user.lastMinterRewardWeight);
+        amounts.push(BigNumber.from(total).mul(userWeight).div(totalWeight));
         if (minters.length === perPage || index === users.length - 1) {
           const bulkIncreaseMinterRewards =
             feeCollectorContract.methods.bulkIncreaseMinterRewards(
@@ -157,35 +169,10 @@ const fetchMintersInfo = async function (blockNumber) {
   var round = 0;
   var maxRound = 1; // look for maximum of 5000 accounts for now
 
-  let data = { users: [], totalDebtFactor: BigNumber.from(0) };
+  let data = { users: [] };
 
   try {
     const theGraphURL = getLiquidationSubgraphEndPoint();
-
-    const globalInfos = (
-      await axios.post(
-        theGraphURL,
-        {
-          query: `query {
-          globalInfos(first: 1, block:{number: ${blockNumber}}) {
-            totalDebtFactor
-          }
-        }`,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
-    ).data.data;
-
-    // TODO: get both accounts and global queries as well from the query
-    console.log(`fetching unhealthy accounts`);
-
-    data.totalDebtFactor = BigNumber.from(
-      globalInfos.globalInfos[0].totalDebtFactor
-    );
 
     while (round < maxRound) {
       const users = (
@@ -196,7 +183,9 @@ const fetchMintersInfo = async function (blockNumber) {
             users(first: 1000, where:{debtFactor_gt:1}, block: {number: ${blockNumber}}) {
               id
               address
-    					debtFactor
+    					lastDebtFactorSetTime
+              minterRewardWeight
+              lastMinterRewardWeight
             }
           }`,
           },
@@ -210,16 +199,15 @@ const fetchMintersInfo = async function (blockNumber) {
       users.forEach((user) => {
         data.users.push({
           address: user.address,
-          debtFactor: BigNumber.from(user.debtFactor),
+          lastDebtFactorSetTime: Number(user.lastDebtFactorSetTime),
+          minterRewardWeight: BigNumber.from(user.minterRewardWeight),
+          lastMinterRewardWeight: BigNumber.from(user.lastMinterRewardWeight),
         });
       });
 
       round++;
     }
-    return {
-      flaggableAccounts: totalFlaggableAccounts,
-      liquidatableAccounts: totalLiquidatableAccounts,
-    };
+    return data;
   } catch (error) {
     return data;
   }
