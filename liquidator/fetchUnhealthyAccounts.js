@@ -10,7 +10,6 @@ exports.fetchUnhealthyAccounts = async function () {
   var maxRound = 1; // look for maximum of 5000 accounts for now
 
   try {
-    // https://thegraph.com/hosted-service/subgraph/arableprotocol/arable-liquidation-fuji
     const theGraphURL = getLiquidationSubgraphEndPoint();
 
     const globalInfos = (
