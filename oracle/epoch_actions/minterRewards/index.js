@@ -89,7 +89,9 @@ const increaseMinterRewards = async function (blockNumber, epochStartTime) {
   try {
     const { ACRE, feeCollector } = await getAddresses();
 
-    console.log(`==increaseMinterRewards at block: ${blockNumber}==`);
+    console.log(
+      `==increaseMinterRewards at block: ${blockNumber}==epochStartTime: ${epochStartTime}====`
+    );
     // TODO: implement!
     // run 30 mins after increasing epoch
     // epochDistributableAmount can be fetched on TheGraph
@@ -119,7 +121,7 @@ const increaseMinterRewards = async function (blockNumber, epochStartTime) {
 
       totalWeight = totalWeight.add(
         user.minterRewardWeight
-          .add(epochStartTime - user.lastDebtFactorSetTime)
+          .add(user.debtFactor.mul(epochStartTime - user.lastDebtFactorSetTime))
           .sub(user.lastMinterRewardWeight)
       );
     }
@@ -138,9 +140,10 @@ const increaseMinterRewards = async function (blockNumber, epochStartTime) {
         const user = users[index];
         minters.push(users[index].address);
         const userWeight = user.minterRewardWeight
-          .add(epochStartTime - user.lastDebtFactorSetTime)
+          .add(user.debtFactor.mul(epochStartTime - user.lastDebtFactorSetTime))
           .sub(user.lastMinterRewardWeight);
         amounts.push(BigNumber.from(total).mul(userWeight).div(totalWeight));
+
         if (minters.length === perPage || index === users.length - 1) {
           const bulkIncreaseMinterRewards =
             feeCollectorContract.methods.bulkIncreaseMinterRewards(
@@ -186,6 +189,7 @@ const fetchMintersInfo = async function (blockNumber) {
     					lastDebtFactorSetTime
               minterRewardWeight
               lastMinterRewardWeight
+              debtFactor
             }
           }`,
           },
@@ -202,6 +206,7 @@ const fetchMintersInfo = async function (blockNumber) {
           lastDebtFactorSetTime: Number(user.lastDebtFactorSetTime),
           minterRewardWeight: BigNumber.from(user.minterRewardWeight),
           lastMinterRewardWeight: BigNumber.from(user.lastMinterRewardWeight),
+          debtFactor: BigNumber.from(user.debtFactor),
         });
       });
 
