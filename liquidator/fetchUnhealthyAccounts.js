@@ -1,8 +1,9 @@
-var axios = require('axios');
-var { BigNumber } = require('ethers');
-var { parseEther } = require('ethers/lib/utils');
-var { formatBigNumber } = require('../utils/format');
-const { getDecimal } = require('./config/address.js');
+var axios = require("axios");
+var { BigNumber } = require("ethers");
+var { parseEther } = require("ethers/lib/utils");
+var { formatBigNumber } = require("../utils/format");
+const { getDecimal } = require("./config/address.js");
+const { getLiquidationSubgraphEndPoint } = require("./config/network");
 
 exports.fetchUnhealthyAccounts = async function () {
   var round = 0;
@@ -10,8 +11,7 @@ exports.fetchUnhealthyAccounts = async function () {
 
   try {
     // https://thegraph.com/hosted-service/subgraph/arableprotocol/arable-liquidation-fuji
-    const theGraphURL =
-      'https://api.thegraph.com/subgraphs/name/arableprotocol/arable-liquidation-fuji';
+    const theGraphURL = getLiquidationSubgraphEndPoint();
 
     const globalInfos = (
       await axios.post(
@@ -47,7 +47,7 @@ exports.fetchUnhealthyAccounts = async function () {
         },
         {
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       )
@@ -81,7 +81,7 @@ exports.fetchUnhealthyAccounts = async function () {
           },
           {
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
           }
         )
@@ -150,13 +150,13 @@ function collectUnhealthyAccounts(users, globalInfos) {
         let allowedRate = allowedRateMapping[collateralAddress];
         if (allowedRate.gt(0)) {
           let normalizedAmount = BigNumber.from(userCollateral.amount)
-            .mul(parseEther('1'))
+            .mul(parseEther("1"))
             .div(BigNumber.from(10).pow(getDecimal(collateralAddress)));
           let collateralValue = normalizedAmount
             .mul(priceMapping[collateralAddress])
-            .div(parseEther('1'));
+            .div(parseEther("1"));
           maxDebt = maxDebt.add(
-            collateralValue.mul(parseEther('1')).div(allowedRate)
+            collateralValue.mul(parseEther("1")).div(allowedRate)
           );
         }
       }
@@ -164,24 +164,24 @@ function collectUnhealthyAccounts(users, globalInfos) {
 
     let userRiskRate = BigNumber.from(0);
     if (maxDebt.gt(0)) {
-      userRiskRate = currDebt.mul(parseEther('1')).div(maxDebt);
+      userRiskRate = currDebt.mul(parseEther("1")).div(maxDebt);
     } else if (currDebt.gt(0)) {
-      userRiskRate = parseEther('100'); // 10000%
+      userRiskRate = parseEther("100"); // 10000%
     }
 
     console.log(
-      'userRiskRate',
+      "userRiskRate",
       formatBigNumber(userRiskRate, 18, 2),
       user.address,
       formatBigNumber(currDebt, 18, 2),
       formatBigNumber(maxDebt, 18, 2)
     );
     console.log(
-      'globalliquidationRate',
+      "globalliquidationRate",
       formatBigNumber(liquidationRate, 18, 2)
     );
     console.log(
-      'globalImmediateLiquidationRate',
+      "globalImmediateLiquidationRate",
       formatBigNumber(immediateLiquidationRate, 18, 2)
     );
 
@@ -194,8 +194,8 @@ function collectUnhealthyAccounts(users, globalInfos) {
     } else {
       // TODO: should update this to use on-chain information
       const currTimestamp = Math.floor(Date.now() / 1000);
-      console.log('user.liquidationDeadline', user.liquidationDeadline);
-      console.log('currTimestamp', currTimestamp);
+      console.log("user.liquidationDeadline", user.liquidationDeadline);
+      console.log("currTimestamp", currTimestamp);
       if (user.liquidationDeadline == 0) {
         flaggableAccounts.push(user);
       } else if (user.liquidationDeadline <= currTimestamp) {
@@ -204,8 +204,8 @@ function collectUnhealthyAccounts(users, globalInfos) {
     }
   });
 
-  console.log('flaggableAccounts', flaggableAccounts);
-  console.log('liquidatableAccounts', liquidatableAccounts);
+  console.log("flaggableAccounts", flaggableAccounts);
+  console.log("liquidatableAccounts", liquidatableAccounts);
 
   return {
     flaggableAccounts,
