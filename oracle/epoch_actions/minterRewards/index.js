@@ -14,7 +14,6 @@ const ethersProvider = getEthersProvider();
 
 exports.startNewMinterEpoch = async function () {
   try {
-    // TODO: implement!
     const { feeCollector } = getAddresses();
     const account = web3.eth.accounts.privateKeyToAccount(
       process.env.PRIVATE_KEY
@@ -92,7 +91,6 @@ const increaseMinterRewards = async function (blockNumber, epochStartTime) {
     console.log(
       `==increaseMinterRewards at block: ${blockNumber}==epochStartTime: ${epochStartTime}====`
     );
-    // TODO: implement!
     // run 30 mins after increasing epoch
     // epochDistributableAmount can be fetched on TheGraph
     // Event is emited when starting new epoch - emit SetEpochTokenRewards(epochNumber, rewardToken, getTotalDistributableRewards(rewardToken));
