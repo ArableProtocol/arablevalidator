@@ -73,11 +73,11 @@ exports.listenNewEpoch = function () {
   contract.on("EpochStart", (epochNumber, epochStartBlock, epochStartTime) => {
     console.log("====epochStart===", epochStartBlock);
     const blockNumber = epochStartBlock.toNumber();
-    const epochStartTime = epochStartTime.toNumber();
+    const epochStartTimeNumber = epochStartTime.toNumber();
 
     const handle = async () => {
       await waitSeconds(60);
-      await increaseMinterRewards(blockNumber, epochStartTime);
+      await increaseMinterRewards(blockNumber, epochStartTimeNumber);
     };
 
     handle().then();
